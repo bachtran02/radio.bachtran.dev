@@ -153,12 +153,11 @@ export function AudioPlayer() {
                         onToggleListen={toggleListen}
                         onStreamTypeChange={setStreamType}
                     />
-
-                    <Queue tracks={queue} />
                 </div>
 
                 <div className="search-section">
                     <Search />
+                    <Queue tracks={queue} />
                 </div>
             </div>
 

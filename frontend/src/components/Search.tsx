@@ -45,7 +45,8 @@ export function Search() {
     };
 
     return (
-        <div>
+        <div className="search-container">
+            <h3>Search</h3>
             <form onSubmit={handleSearch}>
                 <select value={source} onChange={(e) => setSource(e.target.value)}>
                     <option value="youtube">YouTube</option>

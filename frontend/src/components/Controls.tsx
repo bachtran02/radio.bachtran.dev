@@ -24,7 +24,7 @@ export function Controls({
     onStreamTypeChange
 }: ControlsProps) {
     return (
-        <div>
+        <div className="controls">
             <button onClick={onStop}>
                 <Square size={16} />
             </button>
