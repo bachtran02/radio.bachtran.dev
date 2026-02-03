@@ -12,7 +12,19 @@ export function Queue({ tracks }: QueueProps) {
                 {tracks.map((track, i) => (
                     <div key={i} className="queue-item">
                         <span>{i + 1}</span>
-                        <div className="queue-item-title">{track.title}</div>
+                        {track.uri ? (
+                            <a 
+                                href={track.uri} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="queue-item-title" 
+                                title={track.title}
+                            >
+                                {track.title}
+                            </a>
+                        ) : (
+                            <div className="queue-item-title" title={track.title}>{track.title}</div>
+                        )}
                     </div>
                 ))}
             </div>

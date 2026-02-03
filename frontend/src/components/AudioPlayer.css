@@ -80,6 +80,8 @@
 .now-playing-title-text {
   display: inline-block;
   white-space: nowrap;
+  color: #222;
+  text-decoration: none;
 }
 
 .now-playing-title-text:not(.scrolling) {
@@ -316,11 +318,12 @@
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 13.8px;
 }
 
 .queue-item span {
   color: #999;
-  min-width: 24px;
+  min-width: 20px;
 }
 
 .queue-item-title {
@@ -328,6 +331,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* Responsive layout */

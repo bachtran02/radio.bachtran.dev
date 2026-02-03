@@ -8,7 +8,7 @@ interface NowPlayingProps {
 
 export function NowPlaying({ track }: NowPlayingProps) {
     const titleRef = useRef<HTMLDivElement>(null);
-    const titleTextRef = useRef<HTMLSpanElement>(null);
+    const titleTextRef = useRef<HTMLElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
 
@@ -47,14 +47,26 @@ export function NowPlaying({ track }: NowPlayingProps) {
             <div className="now-playing-info">
                 <div className="now-playing-label">Now Playing</div>
                 <div className="now-playing-title" ref={titleRef}>
-                    <span 
-                        ref={titleTextRef}
-                        className={`now-playing-title-text ${isOverflowing ? 'scrolling' : ''}`}
-                        style={isOverflowing ? { '--container-width': `${containerWidth}px` } as React.CSSProperties : undefined}
-                        title={track?.title || "..."}
-                    >
-                        {track?.title || "..."}
-                    </span>
+                    {track?.uri ? (
+                        <a 
+                            href={track.uri} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            ref={titleTextRef as React.RefObject<HTMLAnchorElement>}
+                            className={`now-playing-title-text ${isOverflowing ? 'scrolling' : ''}`}
+                            style={isOverflowing ? { '--container-width': `${containerWidth}px` } as React.CSSProperties : undefined}
+                        >
+                            {track.title}
+                        </a>
+                    ) : (
+                        <span 
+                            ref={titleTextRef as React.RefObject<HTMLSpanElement>}
+                            className={`now-playing-title-text ${isOverflowing ? 'scrolling' : ''}`}
+                            style={isOverflowing ? { '--container-width': `${containerWidth}px` } as React.CSSProperties : undefined}
+                        >
+                            {track?.title || "..."}
+                        </span>
+                    )}
                 </div>
                 <div className="now-playing-artist">{track?.author || "..."}</div>
             </div>
