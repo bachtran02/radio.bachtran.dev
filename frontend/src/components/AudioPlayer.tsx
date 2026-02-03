@@ -15,6 +15,7 @@ export function AudioPlayer() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [streamType, setStreamType] = useState<'hls' | 'webrtc'>('hls');
     const [isPlaying, setIsPlaying] = useState(false); // Local player state (muted/playing)
+    const [volume, setVolume] = useState(0.5);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [queue, setQueue] = useState<Track[]>([]);
     
@@ -34,6 +35,15 @@ export function AudioPlayer() {
         const interval = setInterval(fetchState, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    // Update document title with current track
+    useEffect(() => {
+        if (playbackState?.track?.title) {
+            document.title = `${playbackState.track.title} - Radio Player`;
+        } else {
+            document.title = 'Radio Player';
+        }
+    }, [playbackState?.track?.title]);
 
     // Stream Setup (HLS & WebRTC)
     useEffect(() => {
@@ -123,6 +133,18 @@ export function AudioPlayer() {
     const handlePause = () => api.pause();
     const handleSkip = () => api.skip();
     const handleStop = () => api.stop();
+    const handlePrevious = () => {
+        // Placeholder - backend doesn't support previous yet
+        console.log('Previous button clicked (not implemented)');
+    };
+
+    const handleVolumeChange = (val: number) => {
+        setVolume(val);
+        if (audioRef.current) {
+            audioRef.current.volume = val;
+            audioRef.current.muted = val === 0;
+        }
+    };
 
     // Local audio toggle (listen/mute)
     const toggleListen = () => {
@@ -146,12 +168,15 @@ export function AudioPlayer() {
                         isPaused={playbackState?.paused || false}
                         isPlaying={isPlaying}
                         streamType={streamType}
+                        volume={volume}
                         onStop={handleStop}
                         onPause={handlePause}
                         onResume={handleResume}
                         onSkip={handleSkip}
+                        onPrevious={handlePrevious}
                         onToggleListen={toggleListen}
                         onStreamTypeChange={setStreamType}
+                        onVolumeChange={handleVolumeChange}
                     />
                 </div>
 

@@ -81,6 +81,31 @@
   cursor: pointer;
 }
 
+.volume-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.volume-slider {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.volume-slider input[type="range"] {
+  width: 100px;
+  cursor: pointer;
+}
+
 .search-container {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -267,5 +292,60 @@
 
   .search-container button {
     flex-shrink: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .controls button {
+    padding: 10px 14px;
+  }
+
+  .controls select {
+    width: 100%;
+    order: 10;
+  }
+
+  .volume-control {
+    order: 5;
+  }
+
+  .now-playing {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .now-playing img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 400px) {
+  .audio-player {
+    padding: 10px;
+  }
+
+  .controls button {
+    padding: 8px 10px;
+  }
+
+  .controls button svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .now-playing {
+    padding: 12px;
+  }
+
+  .now-playing img {
+    width: 80px;
+    height: 80px;
   }
 }
