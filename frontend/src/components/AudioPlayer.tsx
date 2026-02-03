@@ -8,8 +8,8 @@ import { Search } from './Search';
 import { Queue } from './Queue';
 import './AudioPlayer.css';
 
-const HLS_URL = 'http://localhost:8888/radio/index.m3u8';
-const WEBRTC_URL = 'http://localhost:8889/radio/whep'; // WHEP endpoint
+const HLS_URL = '/mediamtx/radio/index.m3u8';
+const WEBRTC_URL = '/mediamtx/radio/whep'; // WHEP endpoint
 
 export function AudioPlayer() {
     const audioRef = useRef<HTMLAudioElement>(null);
