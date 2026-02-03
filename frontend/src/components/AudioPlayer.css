@@ -37,6 +37,7 @@
   background: #fafafa;
   width: 100%;
   max-width: 450px;
+  min-height: 120px;
   box-sizing: border-box;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
