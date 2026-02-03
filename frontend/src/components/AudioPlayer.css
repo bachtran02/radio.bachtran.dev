@@ -2,6 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Roboto', sans-serif;
 }
 
 .main-content {
@@ -31,17 +32,85 @@
   gap: 16px;
   align-items: center;
   padding: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid #d0d0d0;
   border-radius: 8px;
-  background-color: #fafafa;
-  min-width: 400px;
+  background: #fafafa;
+  width: 100%;
+  max-width: 450px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .now-playing img {
   width: 80px;
   height: 80px;
+  min-width: 80px;
   object-fit: cover;
   border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.now-playing-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.now-playing-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.now-playing-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 4px;
+  overflow: hidden;
+  cursor: default;
+  max-width: 100%;
+  position: relative;
+}
+
+.now-playing-title-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.now-playing-title-text:not(.scrolling) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.now-playing-title-text.scrolling {
+  animation: scroll-text 16s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes scroll-text {
+  0%, 15% {
+    transform: translateX(0);
+  }
+  50%, 65% {
+    transform: translateX(calc(-100% + var(--container-width)));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.now-playing-artist {
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .controls {
@@ -115,8 +184,8 @@
 
 .search-container h3 {
   margin: 0 0 12px 0;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .search-container form {
@@ -209,7 +278,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 500;
+  font-weight: 400;
   margin-bottom: 4px;
 }
 
@@ -230,8 +299,8 @@
 
 .queue-container h3 {
   margin: 0 0 12px 0;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .queue-list {
@@ -272,7 +341,6 @@
   }
 
   .now-playing {
-    min-width: auto;
     width: 100%;
   }
 
