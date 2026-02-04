@@ -309,31 +309,75 @@
 .queue-list {
   max-height: 300px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .queue-item {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   padding: 8px;
   margin-bottom: 4px;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 13.8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-.queue-item span {
+.queue-item:hover {
+  background-color: #e2e2e2;
+}
+
+.queue-item-index {
   color: #999;
-  min-width: 20px;
+  min-width: 24px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+}
+
+.queue-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.queue-item-placeholder {
+  width: 60px;
+  height: 60px;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.queue-item-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .queue-item-title {
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: inherit;
-  text-decoration: none;
+  font-weight: 400;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+}
+
+.queue-item-meta {
+  font-size: 0.8em;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Responsive layout */

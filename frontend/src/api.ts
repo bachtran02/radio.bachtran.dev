@@ -1,22 +1,6 @@
-export const API_BASE = '/api/player';
-
-export interface Track {
-    title: string;
-    author: string;
-    identifier: string;
-    stream: boolean;
-    isrc: string;
-    length: number;
-    uri: string;
-    artworkUrl?: string;
-}
-
-export interface PlaybackState {
-    playing: boolean;
-    paused: boolean;
-    position: number
-    track: Track | null;
-}
+export const PLAYER_API_BASE = '/api/player';
+export const QUEUE_API_BASE = '/api/queue';
+export const SEARCH_API_BASE = '/api/search';
 
 export interface SearchResult {
     title: string;
@@ -26,44 +10,64 @@ export interface SearchResult {
     artworkUrl?: string;
 }
 
+export interface Track extends SearchResult {
+    identifier: string;
+    stream: boolean;
+    isrc: string;
+}
+
+export interface PlaybackState {
+    playing: boolean;
+    paused: boolean;
+    position: number;
+    track: Track | null;
+}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+    if (!res.ok) {
+        const errorText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`API Error: ${res.status} - ${errorText}`);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : {} as T;
+}
+
 export const api = {
-    add: async (url: string) => {
-        const response = await fetch(`${API_BASE}/add`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: url
-        });
-        if (!response.ok) throw new Error('Failed to add track');
-        return response;
-    },
     search: async (query: string, source: string): Promise<SearchResult[]> => {
         const params = new URLSearchParams({ query, source });
-        const res = await fetch(`${API_BASE}/search?${params}`);
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`Search failed: ${res.status} - ${errorText}`);
-        }
-        const text = await res.text();
-        if (!text) {
-            return [];
-        }
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            console.error('Failed to parse search response:', text);
-            throw new Error('Invalid response from search endpoint');
-        }
+        const res = await fetch(`${SEARCH_API_BASE}?${params}`);
+        return handleResponse<SearchResult[]>(res);
     },
-    skip: () => fetch(`${API_BASE}/skip`, { method: 'POST' }),
-    pause: () => fetch(`${API_BASE}/pause`, { method: 'POST' }),
-    resume: () => fetch(`${API_BASE}/resume`, { method: 'POST' }),
-    stop: () => fetch(`${API_BASE}/stop`, { method: 'POST' }),
+
+    add: async(url: string) => 
+        fetch(`${PLAYER_API_BASE}/add`, { 
+            method: 'POST', 
+            body: url 
+        }).then(handleResponse),
+
+    play: async (url: string) => 
+        fetch(`${PLAYER_API_BASE}/play`, { 
+            method: 'POST', 
+            body: url 
+        }).then(handleResponse),
+
+    removeFromQueue: (index: number) => 
+        fetch(`${QUEUE_API_BASE}/${index}`, { method: 'DELETE' }).then(handleResponse),
+
+    _command: (path: string) => fetch(`${PLAYER_API_BASE}/${path}`, { method: 'POST' }).then(handleResponse),
+
+    skip: () => api._command('skip'),
+    pause: () => api._command('pause'),
+    resume: () => api._command('resume'),
+    stop: () => api._command('stop'),
+
     getPlaybackState: async (): Promise<PlaybackState> => {
-        const res = await fetch(`${API_BASE}/playback`);
-        return res.json();
+        const res = await fetch(`${PLAYER_API_BASE}/playback`);
+        return handleResponse<PlaybackState>(res);
     },
+
     getQueue: async (): Promise<Track[]> => {
-        const res = await fetch(`${API_BASE}/queue`);
-        return res.json();
+        const res = await fetch(QUEUE_API_BASE);
+        return handleResponse<Track[]>(res);
     }
 };

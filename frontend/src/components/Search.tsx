@@ -16,10 +16,9 @@ export function Search() {
         setLoading(true);
         try {
             const results = await api.search(query, source);
-            console.log('Search results:', results);
             setSearchResults(results);
+            setQuery('');
         } catch (error) {
-            console.error('Search error:', error);
             alert('Search failed: ' + error);
         } finally {
             setLoading(false);
@@ -38,10 +37,19 @@ export function Search() {
     };
 
     const formatDuration = (ms: number) => {
-        const seconds = Math.floor(ms / 1000);
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+
+        const paddedSecs = secs.toString().padStart(2, '0');
+
+        if (hours > 0) {
+            const paddedMins = mins.toString().padStart(2, '0');
+            return `${hours}:${paddedMins}:${paddedSecs}`;
+        }
+
+        return `${mins}:${paddedSecs}`;
     };
 
     return (
@@ -51,6 +59,7 @@ export function Search() {
                 <select value={source} onChange={(e) => setSource(e.target.value)}>
                     <option value="youtube">YouTube</option>
                     <option value="spotify">Spotify</option>
+                    <option value="soundcloud">Soundcloud</option>
                 </select>
                 <input
                     type="text"
