@@ -16,6 +16,10 @@ export function AudioPlayer() {
     const [volume, setVolume] = useState(0);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [queue, setQueue] = useState<Track[]>([]);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const saved = localStorage.getItem('darkMode');
+        return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    });
     
     // Remote state polling
     useEffect(() => {
@@ -44,10 +48,23 @@ export function AudioPlayer() {
     }, [playbackState?.track?.title]);
 
     useEffect(() => {
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        localStorage.setItem('darkMode', isDarkMode.toString());
+    }, [isDarkMode]);
+
+    useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        if (Hls.isSupported()) {
+        if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            /* Utilize native HLS support on IOS devices */
+            fetch(HLS_URL)
+                .then(() => {
+                    audio.src = HLS_URL;
+                    audio.play();
+                });
+        } else if (Hls.isSupported()) {
+            /* Fallback to Hls.js */
             const hls = new Hls({
                 maxLiveSyncPlaybackRate: 1.5,
             });
@@ -74,12 +91,9 @@ export function AudioPlayer() {
             };
 
             hls.attachMedia(audio);
-        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            fetch(HLS_URL)
-                .then(() => {
-                    audio.src = HLS_URL;
-                    audio.play();
-                });
+        } else {
+            console.error('HLS not supported in this browser');
+            alert('HLS not supported in this browser');
         }
     }, []);
 
@@ -103,6 +117,21 @@ export function AudioPlayer() {
 
     return (
         <div className="audio-player">
+            <button 
+                className="theme-toggle" 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                aria-label="Toggle dark mode"
+            >
+                {isDarkMode ? (
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                    </svg>
+                ) : (
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                    </svg>
+                )}
+            </button>
             <div className="main-content">
                 <div className="center-section">
                     <NowPlaying track={playbackState?.track || null} />

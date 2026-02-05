@@ -27,9 +27,6 @@ export function Controls({
 
     return (
         <div className="controls">
-            <button onClick={onStop}>
-                <Square size={16} />
-            </button>
             <button onClick={onPrevious}>
                 <SkipBack size={16} />
             </button>
@@ -44,6 +41,9 @@ export function Controls({
             )}
             <button onClick={onSkip}>
                 <SkipForward size={16} />
+            </button>
+            <button onClick={onStop}>
+                <Square size={16} />
             </button>
             <div className="volume-control">
                 <button onClick={() => setShowVolume(!showVolume)}>
