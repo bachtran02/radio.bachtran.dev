@@ -4,30 +4,23 @@ import { Play, Pause, SkipForward, SkipBack, Square, Volume2, VolumeX } from 'lu
 interface ControlsProps {
     isPaused: boolean;
     isPlaying: boolean;
-    streamType: 'hls' | 'webrtc';
     volume: number;
     onStop: () => void;
     onPause: () => void;
     onResume: () => void;
     onSkip: () => void;
     onPrevious: () => void;
-    onToggleListen: () => void;
-    onStreamTypeChange: (type: 'hls' | 'webrtc') => void;
     onVolumeChange: (volume: number) => void;
 }
 
 export function Controls({
     isPaused,
-    isPlaying,
-    streamType,
     volume,
     onStop,
     onPause,
     onResume,
     onSkip,
     onPrevious,
-    onToggleListen,
-    onStreamTypeChange,
     onVolumeChange
 }: ControlsProps) {
     const [showVolume, setShowVolume] = useState(false);
@@ -69,13 +62,6 @@ export function Controls({
                     </div>
                 )}
             </div>
-            <button onClick={onToggleListen}>
-                {isPlaying ? 'Mute' : 'Listen'}
-            </button>
-            <select value={streamType} onChange={(e) => onStreamTypeChange(e.target.value as 'hls' | 'webrtc')}>
-                <option value="hls">HLS</option>
-                <option value="webrtc">WebRTC</option>
-            </select>
         </div>
     );
 }

@@ -12,10 +12,8 @@ const HLS_URL = '/mediamtx/radio/index.m3u8';
 const WEBRTC_URL = '/mediamtx/radio/whep'; // WHEP endpoint
 
 export function AudioPlayer() {
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [streamType, setStreamType] = useState<'hls' | 'webrtc'>('hls');
-    const [isPlaying, setIsPlaying] = useState(false); // Local player state (muted/playing)
-    const [volume, setVolume] = useState(0.5);
+    const audioRef = useRef<HTMLVideoElement>(null);
+    const [volume, setVolume] = useState(0);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [queue, setQueue] = useState<Track[]>([]);
     
@@ -45,88 +43,45 @@ export function AudioPlayer() {
         }
     }, [playbackState?.track?.title]);
 
-    // Stream Setup (HLS & WebRTC)
     useEffect(() => {
-        if (!audioRef.current) return;
-        const audioEl = audioRef.current;
-        let hls: Hls | undefined;
-        let pc: RTCPeerConnection | undefined;
+        const audio = audioRef.current;
+        if (!audio) return;
 
-        const cleanup = () => {
-            if (hls) hls.destroy();
-            if (pc) pc.close();
-            if (audioEl) {
-                audioEl.src = '';
-                audioEl.srcObject = null;
-            }
-        };
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                maxLiveSyncPlaybackRate: 1.5,
+            });
 
-        const setupHLS = () => {
-            if (Hls.isSupported()) {
-                hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+            hls.on(Hls.Events.ERROR, (_, data) => {
+                if (data.fatal) {
+                    hls.destroy();
+                    console.log('Fatal HLS error occurred, reloading stream.');
+                }
+            });
+
+            hls.on(Hls.Events.MEDIA_ATTACHED, () => {
                 hls.loadSource(HLS_URL);
-                hls.attachMedia(audioEl);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    if (isPlaying) audioEl.play().catch(console.error);
-                });
-            } else if (audioEl.canPlayType('application/vnd.apple.mpegurl')) {
-                audioEl.src = HLS_URL;
-            }
-        };
+            });
 
-        const setupWebRTC = async () => {
-            pc = new RTCPeerConnection();
-            pc.addTransceiver('audio', { direction: 'recvonly' });
-            
-            pc.ontrack = (event) => {
-                const stream = event.streams[0];
-                if (stream) {
-                    audioEl.srcObject = stream;
-                    if (isPlaying) audioEl.play().catch(console.error);
+            hls.on(Hls.Events.MANIFEST_LOADED, () => {
+                audio.play();
+            });
+
+            audio.onplay = () => {
+                if (hls.liveSyncPosition !== null) {
+                    audio.currentTime = hls.liveSyncPosition;
                 }
             };
 
-            try {
-                const offer = await pc.createOffer();
-
-                if (offer.sdp) {
-                    // Reassign the modified string back to the offer object
-                    offer.sdp = offer.sdp.replace(
-                        /a=fmtp:111 .*/g,
-                        (line) => `${line.trim()};stereo=1;sprop-stereo=1;maxaveragebitrate=128000;cbr=1`
-                    );
-                } else {
-                    console.error("SDP is undefined. Check if the PeerConnection was initialized correctly.");
-                }
-
-                await pc.setLocalDescription(offer);
-
-                const response = await fetch(WEBRTC_URL, {
-                    method: 'POST',
-                    body: offer.sdp,
-                    headers: { 'Content-Type': 'application/sdp' } // Standard WHEP content type
+            hls.attachMedia(audio);
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            fetch(HLS_URL)
+                .then(() => {
+                    audio.src = HLS_URL;
+                    audio.play();
                 });
-
-                if (response.status === 201 || response.ok) {
-                    const answer = await response.text();
-                    await pc.setRemoteDescription({ type: 'answer', sdp: answer });
-                } else {
-                    console.error("WHEP handshake failed", response.status);
-                }
-            } catch (err) {
-                console.error("WebRTC Setup Error", err);
-            }
-        };
-
-        cleanup(); // Cleanup previous stream before switching
-        if (streamType === 'hls') {
-            setupHLS();
-        } else {
-            setupWebRTC();
         }
-
-        return cleanup;
-    }, [streamType]); // Re-run when streamType changes
+    }, []);
 
     // Controls for the remote bot
     const handleResume = () => api.resume();
@@ -146,18 +101,6 @@ export function AudioPlayer() {
         }
     };
 
-    // Local audio toggle (listen/mute)
-    const toggleListen = () => {
-        if (!audioRef.current) return;
-        if (audioRef.current.paused) {
-            audioRef.current.play();
-            setIsPlaying(true);
-        } else {
-            audioRef.current.pause();
-            setIsPlaying(false);
-        }
-    };
-
     return (
         <div className="audio-player">
             <div className="main-content">
@@ -166,16 +109,13 @@ export function AudioPlayer() {
 
                     <Controls
                         isPaused={playbackState?.paused || false}
-                        isPlaying={isPlaying}
-                        streamType={streamType}
+                        isPlaying={playbackState?.playing || false}
                         volume={volume}
                         onStop={handleStop}
                         onPause={handlePause}
                         onResume={handleResume}
                         onSkip={handleSkip}
                         onPrevious={handlePrevious}
-                        onToggleListen={toggleListen}
-                        onStreamTypeChange={setStreamType}
                         onVolumeChange={handleVolumeChange}
                     />
                 </div>
@@ -186,7 +126,7 @@ export function AudioPlayer() {
                 </div>
             </div>
 
-            <audio ref={audioRef} />
+            <video ref={audioRef} autoPlay muted playsInline />
         </div>
     );
 }
