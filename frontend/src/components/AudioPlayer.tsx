@@ -56,14 +56,7 @@ export function AudioPlayer() {
         const audio = audioRef.current;
         if (!audio) return;
 
-        if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            /* Utilize native HLS support on IOS devices */
-            fetch(HLS_URL)
-                .then(() => {
-                    audio.src = HLS_URL;
-                    audio.play();
-                });
-        } else if (Hls.isSupported()) {
+        if (Hls.isSupported()) {
             /* Fallback to Hls.js */
             const hls = new Hls({
                 maxLiveSyncPlaybackRate: 1.5,
@@ -91,6 +84,13 @@ export function AudioPlayer() {
             };
 
             hls.attachMedia(audio);
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            /* Utilize native HLS support on IOS devices */
+            fetch(HLS_URL)
+                .then(() => {
+                    audio.src = HLS_URL;
+                    audio.play();
+                });
         } else {
             console.error('HLS not supported in this browser');
             alert('HLS not supported in this browser');
