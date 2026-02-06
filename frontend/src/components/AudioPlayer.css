@@ -11,6 +11,7 @@
   --shadow-md: rgba(0, 0, 0, 0.1);
   --hover-overlay: #e8e8e8;
   --active-overlay: #d8d8d8;
+  --progress-bg: #d0d0d0;
 }
 
 body.dark-mode {
@@ -26,6 +27,7 @@ body.dark-mode {
   --shadow-md: rgba(0, 0, 0, 0.5);
   --hover-overlay: #2d2d2d;
   --active-overlay: #333333;
+  --progress-bg: #2d2d2d;
   background-color: var(--bg-primary);
   color: var(--text-primary);
 }
@@ -80,7 +82,7 @@ body.dark-mode {
 }
 
 .search-section {
-  width: 400px;
+  width: 480px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -96,7 +98,7 @@ body.dark-mode {
   border-radius: 8px;
   background: var(--bg-secondary);
   width: 100%;
-  max-width: 450px;
+  max-width: 600px;
   min-height: 120px;
   box-sizing: border-box;
   box-shadow: 0 2px 4px var(--shadow-sm);
@@ -174,6 +176,42 @@ body.dark-mode {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.now-playing-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.now-playing-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  width: 35px;
+}
+
+.now-playing-time:first-child {
+  text-align: center;
+}
+
+.now-playing-time:last-child {
+  text-align: center;
+}
+
+.now-playing-progress {
+  flex: 1;
+  height: 4px;
+  background-color: var(--progress-bg);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.now-playing-progress-bar {
+  height: 100%;
+  background-color: var(--text-primary);
+  transition: width 0.3s ease;
+  border-radius: 2px;
 }
 
 .controls {
@@ -268,6 +306,8 @@ body.dark-mode {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   cursor: pointer;
+  min-width: 110px;
+  max-width: 135px;
 }
 
 .search-container input {
@@ -290,6 +330,7 @@ body.dark-mode {
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .search-container button:hover {

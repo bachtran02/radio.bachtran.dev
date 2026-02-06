@@ -134,7 +134,11 @@ export function AudioPlayer() {
             </button>
             <div className="main-content">
                 <div className="center-section">
-                    <NowPlaying track={playbackState?.track || null} />
+                    <NowPlaying 
+                        track={playbackState?.track || null} 
+                        position={playbackState?.position || 0}
+                        onSeek={(position) => api.seek(position)}
+                    />
 
                     <Controls
                         isPaused={playbackState?.paused || false}

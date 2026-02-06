@@ -67,6 +67,13 @@ export const api = {
     pause: () => api._command('pause'),
     resume: () => api._command('resume'),
     stop: () => api._command('stop'),
+    
+    seek: (position: number) => 
+        fetch(`${PLAYER_API_BASE}/seek`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: position.toString()
+        }).then(handleResponse),
 
     getPlaybackState: async (): Promise<PlaybackState> => {
         const res = await fetch(`${PLAYER_API_BASE}/playback`);
