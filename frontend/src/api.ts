@@ -54,6 +54,13 @@ export const api = {
     removeFromQueue: (index: number) => 
         fetch(`${QUEUE_API_BASE}/${index}`, { method: 'DELETE' }).then(handleResponse),
 
+    moveQueueItem: (fromIndex: number, toIndex: number, uri: string) =>
+        fetch(`${QUEUE_API_BASE}/move`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: fromIndex, to: toIndex, uri: uri })
+        }).then(handleResponse),
+
     _command: (path: string) => fetch(`${PLAYER_API_BASE}/${path}`, { method: 'POST' }).then(handleResponse),
 
     skip: () => api._command('skip'),
