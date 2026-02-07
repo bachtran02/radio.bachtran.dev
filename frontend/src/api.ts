@@ -86,8 +86,7 @@ export const api = {
     },
 
     getRecentlyPlayed: async (): Promise<Track[]> => {
-        // const res = await fetch(`${PLAYER_API_BASE}/history`);
-        // return handleResponse<Track[]>(res);
-        return []
+        const res = await fetch(`${QUEUE_API_BASE}/history`);
+        return handleResponse<Track[]>(res);
     }
 };
