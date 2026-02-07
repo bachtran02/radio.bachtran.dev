@@ -21,6 +21,14 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
         }
     };
 
+    const handleAddTrack = async (uri: string) => {
+        try {
+            await api.add(uri);
+        } catch (error) {
+            alert('Failed to add track');
+        }
+    };
+
     const removeQueuedItem = async (index: number) => {
         try {
             await api.removeFromQueue(index);
@@ -115,9 +123,11 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
                         onDragEnd={isQueueTab ? handleDragEnd : undefined}
                         onClick={(_) => {
                             if (draggedIndex === null) {
-                                handlePlay(track.uri);
                                 if (isQueueTab) {
+                                    handlePlay(track.uri);
                                     removeQueuedItem(i);
+                                } else {
+                                    handleAddTrack(track.uri)
                                 }
                             }
                         }}

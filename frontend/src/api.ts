@@ -2,15 +2,33 @@ export const PLAYER_API_BASE = '/api/player';
 export const QUEUE_API_BASE = '/api/queue';
 export const SEARCH_API_BASE = '/api/search';
 
-export interface SearchResult {
+export interface SearchResultTrack {
+    type: 'track';
+    title: string;
+    author: string;
+    artworkUrl: string;
+    uri: string;
+    duration: number;
+}
+
+export interface SearchResultPlaylist {
+    type: 'playlist';
+    title: string;
+    author: string;
+    artworkUrl: string;
+    uri: string;
+    numItems: number;
+    playlistType: string;
+}
+
+export type SearchResult = SearchResultTrack | SearchResultPlaylist;
+
+export interface Track {
     title: string;
     author: string;
     length: number;
     uri: string;
     artworkUrl?: string;
-}
-
-export interface Track extends SearchResult {
     identifier: string;
     stream: boolean;
     isrc: string;
@@ -33,8 +51,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
-    search: async (query: string, source: string): Promise<SearchResult[]> => {
-        const params = new URLSearchParams({ query, source });
+    search: async (query: string, source: string, types?: string): Promise<SearchResult[]> => {
+        types = types || 'track';
+        const params = new URLSearchParams({ query, source, types });
         const res = await fetch(`${SEARCH_API_BASE}?${params}`);
         return handleResponse<SearchResult[]>(res);
     },
