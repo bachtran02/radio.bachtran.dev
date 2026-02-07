@@ -6,7 +6,7 @@ import { NowPlaying } from './NowPlaying';
 import { Controls } from './Controls';
 import { Search } from './Search';
 import { Queue } from './Queue';
-import './AudioPlayer.css';
+import '../styles/AudioPlayer.css';
 
 const HLS_URL = '/mediamtx/radio/index.m3u8';
 const WEBRTC_URL = '/mediamtx/radio/whep'; // WHEP endpoint
@@ -16,6 +16,7 @@ export function AudioPlayer() {
     const [volume, setVolume] = useState(0);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [queue, setQueue] = useState<Track[]>([]);
+    const [recentlyPlayed, setRecentlyPlayed] = useState<Track[]>([]);
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const saved = localStorage.getItem('darkMode');
         return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -29,6 +30,8 @@ export function AudioPlayer() {
                 setPlaybackState(state);
                 const q = await api.getQueue();
                 setQueue(q);
+                const history = await api.getRecentlyPlayed();
+                setRecentlyPlayed(history);
             } catch (e) {
                 console.error("Failed to fetch state", e);
             }
@@ -153,9 +156,9 @@ export function AudioPlayer() {
                     />
                 </div>
 
-                <div className="search-section">
+                <div className="right-section">
                     <Search />
-                    <Queue tracks={queue} />
+                    <Queue tracks={queue} recentlyPlayed={recentlyPlayed} />
                 </div>
             </div>
 

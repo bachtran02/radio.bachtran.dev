@@ -1,0 +1,85 @@
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+}
+
+.controls button {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.controls button:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.controls button:active {
+  background-color: var(--active-overlay);
+}
+
+.controls select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.volume-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.volume-slider {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  padding: 12px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px var(--shadow-md);
+  z-index: 10;
+}
+
+.volume-slider input[type="range"] {
+  width: 100px;
+  cursor: pointer;
+}
+
+/* @media (max-width: 600px) {
+  .controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .controls button {
+    padding: 10px 14px;
+  }
+
+  .controls select {
+    width: 100%;
+    order: 10;
+  }
+
+  .volume-control {
+    order: 5;
+  }
+} */

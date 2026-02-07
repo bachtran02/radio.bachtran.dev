@@ -1,0 +1,147 @@
+.queue-container {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  background-color: var(--bg-secondary);
+
+}
+
+.queue-container h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.queue-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.queue-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  text-align: center;
+}
+
+.queue-tab:hover {
+  color: var(--text-primary);
+}
+
+.queue-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+}
+
+.queue-list {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.queue-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 100%;
+  text-align: left;
+  cursor: grab;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease;
+  align-items: center;
+  box-sizing: border-box;
+  max-width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.queue-item:hover {
+  background-color: var(--hover-overlay) !important;
+}
+
+.queue-item:active {
+  background-color: var(--active-overlay) !important;
+  cursor: grabbing;
+}
+
+.queue-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.queue-item-placeholder {
+  width: 60px;
+  height: 60px;
+  background-color: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.queue-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.queue-item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.queue-item-meta {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-item-index {
+  color: var(--text-tertiary);
+  min-width: 20px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  margin-right: 4px;
+}
+
+.queue-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.queue-item.drag-over {
+  border-top: 2px solid var(--text-primary);
+  margin-top: 2px;
+}

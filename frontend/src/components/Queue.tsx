@@ -5,9 +5,11 @@ import { Radio } from 'lucide-react';
 
 interface QueueProps {
     tracks: Track[];
+    recentlyPlayed: Track[];
 }
 
-export function Queue({ tracks }: QueueProps) {
+export function Queue({ tracks, recentlyPlayed }: QueueProps) {
+    const [activeTab, setActiveTab] = useState<'queue' | 'history'>('queue');
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -81,24 +83,42 @@ export function Queue({ tracks }: QueueProps) {
         return `${mins}:${paddedSecs}`;
     };
 
+    const currentTracks = activeTab === 'queue' ? tracks : recentlyPlayed;
+    const isQueueTab = activeTab === 'queue';
+
     return (
         <div className="queue-container">
-            <h3>Queue ({tracks.length})</h3>
+            <div className="queue-tabs">
+                <button 
+                    className={`queue-tab ${activeTab === 'queue' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('queue')}
+                >
+                    Queue ({tracks.length})
+                </button>
+                <button 
+                    className={`queue-tab ${activeTab === 'history' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('history')}
+                >
+                    Recently Played ({recentlyPlayed.length})
+                </button>
+            </div>
             <div className="queue-list">
-                {tracks.map((track, i) => (
+                {currentTracks.map((track, i) => (
                     <button 
                         key={i} 
                         className={`queue-item ${draggedIndex === i ? 'dragging' : ''} ${dragOverIndex === i && draggedIndex !== i ? 'drag-over' : ''}`}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, i)}
-                        onDragOver={(e) => handleDragOver(e, i)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, i)}
-                        onDragEnd={handleDragEnd}
+                        draggable={isQueueTab}
+                        onDragStart={isQueueTab ? (e) => handleDragStart(e, i) : undefined}
+                        onDragOver={isQueueTab ? (e) => handleDragOver(e, i) : undefined}
+                        onDragLeave={isQueueTab ? handleDragLeave : undefined}
+                        onDrop={isQueueTab ? (e) => handleDrop(e, i) : undefined}
+                        onDragEnd={isQueueTab ? handleDragEnd : undefined}
                         onClick={(_) => {
                             if (draggedIndex === null) {
                                 handlePlay(track.uri);
-                                removeQueuedItem(i);
+                                if (isQueueTab) {
+                                    removeQueuedItem(i);
+                                }
                             }
                         }}
                     >

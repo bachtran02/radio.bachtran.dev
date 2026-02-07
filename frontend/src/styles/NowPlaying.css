@@ -1,0 +1,135 @@
+.now-playing {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid var(--border-color-light);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  width: 90%;
+  min-height: 120px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px var(--shadow-sm);
+}
+
+.now-playing img {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.now-playing-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.now-playing-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.now-playing-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  cursor: default;
+  max-width: 100%;
+  position: relative;
+}
+
+.now-playing-title-text {
+  display: inline-block;
+  white-space: nowrap;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.now-playing-title-text:not(.scrolling) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.now-playing-title-text.scrolling {
+  animation: scroll-text 16s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes scroll-text {
+  0%, 15% {
+    transform: translateX(0);
+  }
+  50%, 65% {
+    transform: translateX(calc(-100% + var(--container-width)));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.now-playing-artist {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.now-playing-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.now-playing-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  width: 35px;
+}
+
+.now-playing-time:first-child {
+  text-align: center;
+}
+
+.now-playing-time:last-child {
+  text-align: center;
+}
+
+.now-playing-progress {
+  flex: 1;
+  height: 4px;
+  background-color: var(--progress-bg);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.now-playing-progress-bar {
+  height: 100%;
+  background-color: var(--text-primary);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+@media (max-width: 600px) {
+  .now-playing {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .now-playing img {
+    width: 100px;
+    height: 100px;
+  }
+}
