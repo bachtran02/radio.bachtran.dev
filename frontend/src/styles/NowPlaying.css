@@ -132,4 +132,12 @@
     width: 100px;
     height: 100px;
   }
+
+  .now-playing-info {
+    width: 100%;
+  }
+
+  .now-playing-progress-container {
+    width: 100%;
+  }
 }
