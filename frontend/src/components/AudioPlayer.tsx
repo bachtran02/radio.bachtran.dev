@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
-import { api } from '../api';
+import { api, LoopMode } from '../api';
 import type { PlaybackState, Track } from '../api';
 import { NowPlaying } from './NowPlaying';
 import { Controls } from './Controls';
@@ -105,10 +105,7 @@ export function AudioPlayer() {
     const handlePause = () => api.pause();
     const handleSkip = () => api.skip();
     const handleStop = () => api.stop();
-    const handlePrevious = () => {
-        // Placeholder - backend doesn't support previous yet
-        console.log('Previous button clicked (not implemented)');
-    };
+    const handlePrevious = () => api.seek(0);
 
     const handleVolumeChange = (val: number) => {
         setVolume(val);
@@ -116,6 +113,24 @@ export function AudioPlayer() {
             audioRef.current.volume = val;
             audioRef.current.muted = val === 0;
         }
+    };
+
+    const handleLoopToggle = async () => {
+        try {
+            const currentMode = playbackState?.loop || LoopMode.NONE;
+            const newMode = currentMode === LoopMode.NONE ? LoopMode.TRACK : LoopMode.NONE;
+            await api.setLoopMode(newMode);
+            const state = await api.getPlaybackState();
+            setPlaybackState(state);
+        } catch (err) {
+            console.error('Error toggling loop mode:', err);
+        }
+    };
+
+    const handleShuffle = async () => {
+        await api.shuffle();
+        const q = await api.getQueue();
+        setQueue(q);
     };
 
     return (
@@ -147,12 +162,15 @@ export function AudioPlayer() {
                         isPaused={playbackState?.paused || false}
                         isPlaying={playbackState?.playing || false}
                         volume={volume}
+                        loopMode={playbackState?.loop || LoopMode.NONE}
                         onStop={handleStop}
                         onPause={handlePause}
                         onResume={handleResume}
                         onSkip={handleSkip}
                         onPrevious={handlePrevious}
                         onVolumeChange={handleVolumeChange}
+                        onLoopToggle={handleLoopToggle}
+                        onShuffle={handleShuffle}
                     />
                 </div>
 

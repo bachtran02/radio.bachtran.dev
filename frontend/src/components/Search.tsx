@@ -114,9 +114,7 @@ export function Search() {
                                 <div className="search-result-meta">
                                     {result.type === 'track' 
                                         ? `${result.author} • ${formatDuration(result.duration)}`
-                                        : result.numItems > 0 
-                                            ? `${result.author} • ${result.numItems} items`
-                                            : result.author
+                                        : `${result.author} • ${result.numItems} ${result.numItems < 2 ? 'item' : 'items'}`
                                     }
                                 </div>
                             </div>

@@ -63,23 +63,15 @@
   cursor: pointer;
 }
 
-/* @media (max-width: 600px) {
+@media (max-width: 530px) {
   .controls {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
+    margin: 0 auto;
   }
 
   .controls button {
     padding: 10px 14px;
   }
-
-  .controls select {
-    width: 100%;
-    order: 10;
-  }
-
-  .volume-control {
-    order: 5;
-  }
-} */
+}

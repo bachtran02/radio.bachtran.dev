@@ -184,22 +184,3 @@
   white-space: nowrap;
 }
 
-@media (max-width: 900px) {
-  .search-container form {
-    flex-wrap: wrap;
-  }
-
-  .search-container select {
-    flex: 1;
-    min-width: 100px;
-  }
-
-  .search-container input {
-    min-width: 0;
-    flex: 2;
-  }
-
-  .search-container button {
-    flex-shrink: 0;
-  }
-}
