@@ -1,26 +1,49 @@
 import { Radio } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import type { Track } from '../api';
+import { usePlayer } from '../../../context/PlayerContext';
+import { api } from '../../../lib/api';
+import { displayDuration } from '../../../lib/utils';
+export function NowPlaying() {
 
-interface NowPlayingProps {
-    track: Track | null;
-    position?: number;
-    onSeek?: (position: number) => void;
-}
+    const { playerData } = usePlayer();
 
-const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
-    
-    if (hours > 0) {
-        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const track = playerData?.state?.track;
+    const isPaused = playerData?.state?.isPaused ?? true;
+    const duration = track?.duration || 0;
+    const isStream = track?.isStream || false;
+
+    const serverPosition = playerData?.state?.position;
+    const [localProgress, setLocalProgress] = useState(serverPosition ?? 0);
+
+    useEffect(() => {
+    if (typeof serverPosition !== 'number') return;
+
+    if (playerData?.eventType === 'TRACK_STARTED') {
+        setLocalProgress(0);
+        return;
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
 
-export function NowPlaying({ track, position = 0, onSeek }: NowPlayingProps) {
+    /* Prevent drifting */
+    const drift = Math.abs(localProgress - serverPosition);
+    if (drift > 2000 || serverPosition === 0) {
+        setLocalProgress(serverPosition);
+    }
+}, [serverPosition, playerData?.eventType]);
+
+    useEffect(() => {
+        if (isPaused || isStream) return;
+
+        const interval = setInterval(() => {
+            setLocalProgress((prev: number) => {
+                const next = prev + 1000;
+                return next > duration ? duration : next;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [isPaused, isStream, duration]);
+
+
     const titleRef = useRef<HTMLDivElement>(null);
     const titleTextRef = useRef<HTMLElement>(null);
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -86,29 +109,36 @@ export function NowPlaying({ track, position = 0, onSeek }: NowPlayingProps) {
                 
                 {track && (
                     <div className="now-playing-progress-container">
-                        <span className="now-playing-time">{formatTime(position)}</span>
+                        <span 
+                            className="now-playing-time" 
+                            style={{ visibility: isStream ? 'hidden' : 'visible' }}
+                        >
+                            {displayDuration(false, localProgress)}
+                        </span>
                         <div 
-                            className="now-playing-progress"
+                            className={`now-playing-progress`}
                             onClick={(e) => {
-                                if (!onSeek || !track.length) return;
+                                if (isStream || !duration) return;
+
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const clickX = e.clientX - rect.left;
                                 const percentage = clickX / rect.width;
-                                const newPosition = Math.floor(percentage * track.length);
-                                onSeek(Math.max(0, Math.min(track.length, newPosition)));
+                                const newPosition = Math.floor(percentage * duration);
+                                
+                                setLocalProgress(newPosition);
+                                api.seek(newPosition);
                             }}
-                            style={{ cursor: onSeek ? 'pointer' : 'default' }}
+                            style={{ cursor: 'pointer' }}
                         >
+
                             <div 
-                                className="now-playing-progress-bar"
+                                className={`now-playing-progress-bar`}
                                 style={{ 
-                                    width: track.length 
-                                        ? `${Math.min(100, (position / track.length) * 100)}%` 
-                                        : '0%' 
+                                    width: isStream ? '100%' : `${Math.min(100, (localProgress / duration) * 100)}%` 
                                 }}
                             />
                         </div>
-                        <span className="now-playing-time">{formatTime(track.length || 0)}</span>
+                        <span className="now-playing-time">{displayDuration(isStream, track.duration || 0)}</span>
                     </div>
                 )}
             </div>

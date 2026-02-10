@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { Radio, Search as SearchIcon } from 'lucide-react';
-import { api } from '../api';
-import type { SearchResult } from '../api';
+import { useState } from 'react';
+import { api } from '../../../lib/api';
+import { displayDuration } from '../../../lib/utils';
+import type { SearchResult } from '../../../lib/api';
 
 type FilterType = 'track' | 'playlist' | 'album' | 'artist';
 
@@ -41,22 +42,6 @@ export function Search() {
         } finally {
             setAddingUri(null);
         }
-    };
-
-    const formatDuration = (ms: number) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const mins = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
-
-        const paddedSecs = secs.toString().padStart(2, '0');
-
-        if (hours > 0) {
-            const paddedMins = mins.toString().padStart(2, '0');
-            return `${hours}:${paddedMins}:${paddedSecs}`;
-        }
-
-        return `${mins}:${paddedSecs}`;
     };
 
     return (
@@ -113,7 +98,7 @@ export function Search() {
                                 <div className="search-result-title">{result.title}</div>
                                 <div className="search-result-meta">
                                     {result.type === 'track' 
-                                        ? `${result.author} • ${formatDuration(result.duration)}`
+                                        ? `${result.author} • ${displayDuration(result.stream, result.duration)}`
                                         : `${result.author} • ${result.numItems} ${result.numItems < 2 ? 'item' : 'items'}`
                                     }
                                 </div>

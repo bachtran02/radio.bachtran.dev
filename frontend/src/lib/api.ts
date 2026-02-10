@@ -3,8 +3,8 @@ export const QUEUE_API_BASE = '/api/queue';
 export const SEARCH_API_BASE = '/api/search';
 
 export const LoopMode = {
-    NONE: 'NONE',
-    TRACK: 'TRACK'
+    NONE: 'none',
+    TRACK: 'track'
 } as const;
 
 export type LoopMode = typeof LoopMode[keyof typeof LoopMode];
@@ -16,6 +16,7 @@ export interface SearchResultTrack {
     artworkUrl: string;
     uri: string;
     duration: number;
+    stream: boolean;
 }
 
 export interface SearchResultPlaylist {
@@ -114,6 +115,7 @@ export const api = {
         };
     },
 
+    /*
     getQueue: async (): Promise<Track[]> => {
         const res = await fetch(QUEUE_API_BASE);
         return handleResponse<Track[]>(res);
@@ -123,4 +125,5 @@ export const api = {
         const res = await fetch(`${QUEUE_API_BASE}/history`);
         return handleResponse<Track[]>(res);
     }
+    */
 };

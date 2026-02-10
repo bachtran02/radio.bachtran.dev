@@ -1,14 +1,16 @@
-import { useState } from 'react';
-import type { Track } from '../api';
-import { api } from '../api';
 import { Radio } from 'lucide-react';
+import { useState } from 'react';
+import { usePlayer } from '../../../context/PlayerContext';
+import { api } from '../../../lib/api';
+import { displayDuration } from '../../../lib/utils';
+import type { TrackInfo } from '../../../types/player';
 
-interface QueueProps {
-    tracks: Track[];
-    recentlyPlayed: Track[];
-}
+export function Queue() {
+    const { playerData } = usePlayer();
 
-export function Queue({ tracks, recentlyPlayed }: QueueProps) {
+    const queue = playerData?.queue || [];
+    const history = playerData?.history || [];
+
     const [activeTab, setActiveTab] = useState<'queue' | 'history'>('queue');
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -64,7 +66,7 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
             return;
         }
 
-        await api.moveQueueItem(draggedIndex, dropIndex, tracks[draggedIndex].uri);
+        await api.moveQueueItem(draggedIndex, dropIndex, queue[draggedIndex].uri);
         
         setDraggedIndex(null);
         setDragOverIndex(null);
@@ -75,23 +77,7 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
         setDragOverIndex(null);
     };
 
-    const formatDuration = (ms: number) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const mins = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
-
-        const paddedSecs = secs.toString().padStart(2, '0');
-
-        if (hours > 0) {
-            const paddedMins = mins.toString().padStart(2, '0');
-            return `${hours}:${paddedMins}:${paddedSecs}`;
-        }
-
-        return `${mins}:${paddedSecs}`;
-    };
-
-    const currentTracks = activeTab === 'queue' ? tracks : recentlyPlayed;
+    const currentTracks = activeTab === 'queue' ? queue : history;
     const isQueueTab = activeTab === 'queue';
 
     return (
@@ -101,17 +87,17 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
                     className={`queue-tab ${activeTab === 'queue' ? 'active' : ''}`}
                     onClick={() => setActiveTab('queue')}
                 >
-                    Queue ({tracks.length})
+                    Queue ({queue.length})
                 </button>
                 <button 
                     className={`queue-tab ${activeTab === 'history' ? 'active' : ''}`}
                     onClick={() => setActiveTab('history')}
                 >
-                    Recently Played ({recentlyPlayed.length})
+                    Recently Played ({history.length})
                 </button>
             </div>
             <div className="queue-list">
-                {currentTracks.map((track, i) => (
+                {currentTracks.map((track: TrackInfo, i: number) => (
                     <button 
                         key={i} 
                         className={`queue-item ${draggedIndex === i ? 'dragging' : ''} ${dragOverIndex === i && draggedIndex !== i ? 'drag-over' : ''}`}
@@ -142,7 +128,7 @@ export function Queue({ tracks, recentlyPlayed }: QueueProps) {
                         )}
                         <div className="queue-item-info">
                             <div className="queue-item-title" title={track.title}>{track.title}</div>
-                            <div className="queue-item-meta" title={`${track.author} • ${formatDuration(track.length)}`}>{track.author} • {formatDuration(track.length)}</div>
+                            <div className="queue-item-meta" title={`${track.author} • ${displayDuration(track.isStream, track.duration)}`}>{track.author} • {displayDuration(track.isStream, track.duration)}</div>
                         </div>
                     </button>
                 ))}

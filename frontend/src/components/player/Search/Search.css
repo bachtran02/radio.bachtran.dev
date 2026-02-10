@@ -21,7 +21,7 @@
 .search-filters {
   display: flex;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -34,12 +34,10 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: capitalize;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   position: relative;
-  overflow: hidden;
-  min-width: 90px;
+  min-width: 120px;
   text-align: center;
 }
 
@@ -184,3 +182,8 @@
   white-space: nowrap;
 }
 
+@media (max-width: 600px) {
+  .filter-button {
+    min-width: 80px;
+  }
+}
