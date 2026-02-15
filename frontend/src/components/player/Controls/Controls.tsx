@@ -53,10 +53,10 @@ export function Controls() {
             </button>
 
             {curLoop === LoopMode.NONE ? (
-                <button onClick={() => {
+                <button className="loop-off" onClick={() => {
                     setOptimisticLoop(LoopMode.QUEUE);
                     api.setLoopMode(LoopMode.QUEUE)
-                }} title="Loop: Off" style={{ opacity: 0.5 }}>
+                }} title="Loop: Off">
                     <Repeat size={16} />
                 </button>
             ) : curLoop === LoopMode.QUEUE ? (
