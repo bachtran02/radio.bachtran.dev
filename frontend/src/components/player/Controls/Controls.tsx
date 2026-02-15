@@ -54,9 +54,16 @@ export function Controls() {
 
             {curLoop === LoopMode.NONE ? (
                 <button onClick={() => {
+                    setOptimisticLoop(LoopMode.QUEUE);
+                    api.setLoopMode(LoopMode.QUEUE)
+                }} title="Loop: Off" style={{ opacity: 0.5 }}>
+                    <Repeat size={16} />
+                </button>
+            ) : curLoop === LoopMode.QUEUE ? (
+                <button onClick={() => {
                     setOptimisticLoop(LoopMode.TRACK);
                     api.setLoopMode(LoopMode.TRACK)
-                }} title="Loop: Off">
+                }} title="Loop: Queue">
                     <Repeat size={16} />
                 </button>
             ) : (
@@ -69,7 +76,7 @@ export function Controls() {
             )}
 
             <div className="volume-control">
-                <button onClick={() => setShowVolume(!showVolume)}>
+                <button onClick={() => setShowVolume(!showVolume)} title="Volume">
                     {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </button>
 

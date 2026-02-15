@@ -1,4 +1,5 @@
 @import '../../../styles/theme.css';
+@import '../../../styles/context-menu.css';
 @import '../NowPlaying/NowPlaying.css';
 @import '../Controls/Controls.css';
 @import '../Search/Search.css';

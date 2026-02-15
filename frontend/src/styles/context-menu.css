@@ -1,0 +1,61 @@
+/* Shared context menu styles */
+.context-menu-button {
+  padding: 14px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.context-menu-button:hover {
+  background-color: var(--hover-overlay);
+  color: var(--text-primary);
+}
+
+.context-menu {
+  position: fixed;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  min-width: 160px;
+  transform: translate(-100%, -50%);
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+.context-menu-item:hover {
+  background-color: var(--hover-overlay);
+}
+
+.context-menu-item:first-child {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.context-menu-item:last-child {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}

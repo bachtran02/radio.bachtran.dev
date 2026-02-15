@@ -4,7 +4,8 @@ export const SEARCH_API_BASE = '/api/search';
 
 export const LoopMode = {
     NONE: 'none',
-    TRACK: 'track'
+    TRACK: 'track',
+    QUEUE: 'queue',
 } as const;
 
 export type LoopMode = typeof LoopMode[keyof typeof LoopMode];
@@ -67,10 +68,11 @@ export const api = {
         return handleResponse<SearchResult[]>(res);
     },
 
-    add: async(url: string) => 
+    add: async(url: string, next: boolean = false, shuffle: boolean = false) => 
         fetch(`${PLAYER_API_BASE}/add`, { 
             method: 'POST', 
-            body: url 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, next, shuffle })
         }).then(handleResponse),
 
     play: async (url: string) => 
@@ -106,6 +108,7 @@ export const api = {
             body: position.toString()
         }).then(handleResponse),
 
+    /* 
     getPlaybackState: async (): Promise<PlaybackState> => {
         const res = await fetch(`${PLAYER_API_BASE}/playback`);
         const state = await handleResponse<any>(res);
@@ -114,6 +117,7 @@ export const api = {
             loop: (state.loop?.toUpperCase() || 'NONE') as LoopMode
         };
     },
+    */
 
     /*
     getQueue: async (): Promise<Track[]> => {
