@@ -72,6 +72,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    useEffect(() => {
+        const track = playerData?.state?.track;
+        if (track) {
+            document.title = `${track.title} | ${track.author}`;
+        } else {
+            document.title = 'Bach\'s Personal Radio';
+        }
+    }, [playerData?.state?.track]);
+
     const value = {
         audioRef,
         volume,
