@@ -63,12 +63,13 @@
   cursor: pointer;
 }
 
-@media (max-width: 530px) {
+@media (max-width: 500px) {
   .controls {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
     margin: 0 auto;
+    max-width: 300px;
   }
 
   .controls button {

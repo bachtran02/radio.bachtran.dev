@@ -1,8 +1,9 @@
-@import './theme.css';
-@import './NowPlaying.css';
-@import './Controls.css';
-@import './Search.css';
-@import './Queue.css';
+@import '../../../styles/theme.css';
+@import '../../../styles/context-menu.css';
+@import '../NowPlaying/NowPlaying.css';
+@import '../Controls/Controls.css';
+@import '../Search/Search.css';
+@import '../Queue/Queue.css';
 
 .audio-player {
   max-width: 1400px;
@@ -20,7 +21,7 @@
 
 .center-section {
   flex: 1;
-  min-width: 500px;
+  min-width: 400px;
   max-width: 800px;
   display: flex;
   flex-direction: column;
@@ -30,7 +31,7 @@
 
 .right-section {
   flex: 1;
-  min-width: 500px;
+  min-width: 400px;
   max-width: 600px;
   display: flex;
   flex-direction: column;

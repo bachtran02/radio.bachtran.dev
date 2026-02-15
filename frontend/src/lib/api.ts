@@ -3,8 +3,9 @@ export const QUEUE_API_BASE = '/api/queue';
 export const SEARCH_API_BASE = '/api/search';
 
 export const LoopMode = {
-    NONE: 'NONE',
-    TRACK: 'TRACK'
+    NONE: 'none',
+    TRACK: 'track',
+    QUEUE: 'queue',
 } as const;
 
 export type LoopMode = typeof LoopMode[keyof typeof LoopMode];
@@ -16,6 +17,7 @@ export interface SearchResultTrack {
     artworkUrl: string;
     uri: string;
     duration: number;
+    stream: boolean;
 }
 
 export interface SearchResultPlaylist {
@@ -66,10 +68,11 @@ export const api = {
         return handleResponse<SearchResult[]>(res);
     },
 
-    add: async(url: string) => 
+    add: async(url: string, next: boolean = false, shuffle: boolean = false) => 
         fetch(`${PLAYER_API_BASE}/add`, { 
             method: 'POST', 
-            body: url 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, next, shuffle })
         }).then(handleResponse),
 
     play: async (url: string) => 
@@ -105,6 +108,7 @@ export const api = {
             body: position.toString()
         }).then(handleResponse),
 
+    /* 
     getPlaybackState: async (): Promise<PlaybackState> => {
         const res = await fetch(`${PLAYER_API_BASE}/playback`);
         const state = await handleResponse<any>(res);
@@ -113,7 +117,9 @@ export const api = {
             loop: (state.loop?.toUpperCase() || 'NONE') as LoopMode
         };
     },
+    */
 
+    /*
     getQueue: async (): Promise<Track[]> => {
         const res = await fetch(QUEUE_API_BASE);
         return handleResponse<Track[]>(res);
@@ -123,4 +129,5 @@ export const api = {
         const res = await fetch(`${QUEUE_API_BASE}/history`);
         return handleResponse<Track[]>(res);
     }
+    */
 };

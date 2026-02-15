@@ -1,0 +1,77 @@
+services:
+  # MediaMTX for WebRTC streaming
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: radio-mediamtx
+    restart: unless-stopped
+    ports:
+      - "8189:8189/udp"  # WebRTC media transport
+    volumes:
+      - ./backend/webrtc-bridge/mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    networks:
+      - docker_global_network
+      # - radio-network
+
+  # WebRTC Bridge (Go service)
+  webrtc-bridge:
+    build:
+      context: ./backend/webrtc-bridge
+      dockerfile: Dockerfile
+    container_name: radio-webrtc-bridge
+    restart: unless-stopped
+    volumes:
+      - ./backend/webrtc-bridge/config.yml:/app/config.yml:ro
+    depends_on:
+      - mediamtx
+    networks:
+      - docker_global_network
+      # - radio-network
+    environment:
+      - GRPC_HOST=lavaradio
+
+  # Lavaradio Backend (Kotlin/Spring Boot)
+  lavaradio:
+    build:
+      context: ./backend/lavaradio
+      dockerfile: Dockerfile
+    container_name: radio-lavaradio
+    restart: unless-stopped
+    ports:
+      - "9099:8080"
+    depends_on:
+      - webrtc-bridge
+    networks:
+      - docker_global_network
+      # - radio-network
+    environment:
+      - KOTLIN_SERVER_PORT=8080
+      - KOTLIN_GRPC_PORT=9090
+      - WEBRTC_GRPC_HOST=webrtc-bridge
+      - WEBRTC_GRPC_PORT=50051
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: radio-frontend
+    restart: unless-stopped
+    depends_on:
+      - lavaradio
+      - mediamtx
+    networks:
+      - docker_global_network
+      # - radio-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radio.rule=Host(`radio.bachtran.dev`)"
+      - "traefik.http.routers.radio.entrypoints=websecure"
+      - "traefik.http.services.radio.loadbalancer.server.port=3000"
+      - "traefik.http.routers.radio.tls.certresolver=myresolver"
+
+# networks:
+#   radio-network:
+#     driver: bridge
+
+networks:
+  docker_global_network:
+    external: true
