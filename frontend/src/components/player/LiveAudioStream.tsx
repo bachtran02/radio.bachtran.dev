@@ -60,5 +60,5 @@ export function LiveAudioStream() {
         }
     }, []);
 
-    return <video ref={audioRef} autoPlay muted playsInline />
+    return <video ref={audioRef} autoPlay muted playsInline style={{ display: 'none' }} />;
 }
