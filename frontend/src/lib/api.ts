@@ -1,3 +1,4 @@
+export const STREAM_API_BASE = '/api/stream';
 export const PLAYER_API_BASE = '/api/player';
 export const QUEUE_API_BASE = '/api/queue';
 export const SEARCH_API_BASE = '/api/search';
@@ -49,6 +50,11 @@ export interface PlaybackState {
     position: number;
     track: Track | null;
     loop: LoopMode;
+}
+
+export interface StreamState {
+    active: boolean;
+    identifier: string | null;
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -107,6 +113,26 @@ export const api = {
             headers: { 'Content-Type': 'application/json' },
             body: position.toString()
         }).then(handleResponse),
+
+    getStreamState: async (): Promise<StreamState> => {
+        const res = await fetch(`${STREAM_API_BASE}/guest`);
+        
+        if (!res.ok) {
+            console.error('Failed to fetch stream state:', res.statusText);
+            return { active: false, identifier: null };
+        }
+        return await handleResponse<StreamState>(res);
+    },
+
+    startStreamGuest: async (): Promise<void> => {
+        const res = await fetch(`${STREAM_API_BASE}/start/guest`, {
+            method: 'POST',
+        });
+        if (!res.ok) {
+            const errorText = await res.text().catch(() => 'Unknown error');
+            throw new Error(`Failed to start stream: ${res.status} - ${errorText}`);
+        }
+    }
 
     /* 
     getPlaybackState: async (): Promise<PlaybackState> => {

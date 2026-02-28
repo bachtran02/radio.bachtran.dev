@@ -10,12 +10,34 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { usePlayer } from '../../../context/PlayerContext';
-import { api, LoopMode } from '../../../lib/api';
+import { api, LoopMode, type StreamState } from '../../../lib/api';
+import { InitialControls } from './InitialControls';
 
 export function Controls() {
+
+    const [streamState, setStreamState] = useState<StreamState | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch the state once when the component mounts
+        api.getStreamState()
+            .then((state) => {
+                setStreamState(state);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, []);
+
+    if (isLoading) {
+        return <div className="loading">Checking stream status...</div>;
+    } else if (!streamState?.active) {
+        return <InitialControls />;
+    }
+
     const { playerData, volume, updateVolume } = usePlayer();
     const [showVolume, setShowVolume] = useState(false);
     const [optimisticLoop, setOptimisticLoop] = useState<LoopMode | null>(null);
