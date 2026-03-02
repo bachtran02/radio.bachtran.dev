@@ -1,10 +1,14 @@
-export const STREAM_API_BASE = '/api/stream';
-export const PLAYER_API_BASE = '/api/player';
-export const QUEUE_API_BASE = '/api/queue';
-export const SEARCH_API_BASE = '/api/search';
+const STREAM_API_BASE = '/api/stream';
+const PLAYER_API_BASE = '/api/player';
+const QUEUE_API_BASE  = '/api/queue';
+const SEARCH_API_BASE = '/api/search';
+
+// ---------------------------------------------------------------------------
+// Shared types
+// ---------------------------------------------------------------------------
 
 export const LoopMode = {
-    NONE: 'none',
+    NONE:  'none',
     TRACK: 'track',
     QUEUE: 'queue',
 } as const;
@@ -33,29 +37,14 @@ export interface SearchResultPlaylist {
 
 export type SearchResult = SearchResultTrack | SearchResultPlaylist;
 
-export interface Track {
-    title: string;
-    author: string;
-    length: number;
-    uri: string;
-    artworkUrl?: string;
-    identifier: string;
-    stream: boolean;
-    isrc: string;
-}
-
-export interface PlaybackState {
-    playing: boolean;
-    paused: boolean;
-    position: number;
-    track: Track | null;
-    loop: LoopMode;
-}
-
 export interface StreamState {
     active: boolean;
     identifier: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 async function handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {
@@ -63,97 +52,91 @@ async function handleResponse<T>(res: Response): Promise<T> {
         throw new Error(`API Error: ${res.status} - ${errorText}`);
     }
     const text = await res.text();
-    return text ? JSON.parse(text) : {} as T;
+    return text ? (JSON.parse(text) as T) : ({} as T);
 }
 
-export const api = {
-    search: async (query: string, source: string, types?: string): Promise<SearchResult[]> => {
-        types = types || 'track';
-        const params = new URLSearchParams({ query, source, types });
-        const res = await fetch(`${SEARCH_API_BASE}?${params}`);
-        return handleResponse<SearchResult[]>(res);
-    },
+function post(url: string): Promise<unknown> {
+    return fetch(url, { method: 'POST' }).then(handleResponse);
+}
 
-    add: async(url: string, next: boolean = false, shuffle: boolean = false) => 
-        fetch(`${PLAYER_API_BASE}/add`, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, next, shuffle })
-        }).then(handleResponse),
+// ---------------------------------------------------------------------------
+// Stream-scoped API factory
+// Call once with a streamId; every returned method is already bound to it.
+// ---------------------------------------------------------------------------
 
-    play: async (url: string) => 
-        fetch(`${PLAYER_API_BASE}/play`, { 
-            method: 'POST', 
-            body: url 
-        }).then(handleResponse),
+export type StreamApi = ReturnType<typeof createStreamApi>;
 
-    removeFromQueue: (index: number) => 
-        fetch(`${QUEUE_API_BASE}/${index}`, { method: 'DELETE' }).then(handleResponse),
+export function createStreamApi(streamId: string) {
+    const stream_path = `${STREAM_API_BASE}/${streamId}`;
+    const player_path = `${PLAYER_API_BASE}/${streamId}`;
+    const queue_path  = `${QUEUE_API_BASE}/${streamId}`;
+    const search_path = `${SEARCH_API_BASE}/${streamId}`;
 
-    moveQueueItem: (fromIndex: number, toIndex: number, uri: string) =>
-        fetch(`${QUEUE_API_BASE}/move`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: fromIndex, to: toIndex, uri: uri })
-        }).then(handleResponse),
+    const command = (path: string) => post(`${player_path}/${path}`);
 
-    _command: (path: string) => fetch(`${PLAYER_API_BASE}/${path}`, { method: 'POST' }).then(handleResponse),
+    return {
+        // Stream control
+        startStream: async (): Promise<void> => {
+            const res = await fetch(`${stream_path}/start`, { method: 'POST' });
+            if (!res.ok) {
+                const errorText = await res.text().catch(() => 'Unknown error');
+                throw new Error(`Failed to start stream: ${res.status} - ${errorText}`);
+            }
+        },
 
-    skip: () => api._command('skip'),
-    pause: () => api._command('pause'),
-    resume: () => api._command('resume'),
-    stop: () => api._command('stop'),
-    
-    setLoopMode: (mode: LoopMode) => api._command(`loop/${mode}`),
-    shuffle: () => api._command('shuffle'),
-    
-    seek: (position: number) => 
-        fetch(`${PLAYER_API_BASE}/seek`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: position.toString()
-        }).then(handleResponse),
+        // Playback controls
+        skip:    () => command('skip'),
+        pause:   () => command('pause'),
+        resume:  () => command('resume'),
+        stop:    () => command('stop'),
+        shuffle: () => command('shuffle'),
 
+        setLoopMode: (mode: LoopMode) => command(`loop/${mode}`),
+
+        seek: (position: number) =>
+            fetch(`${player_path}/seek`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: position.toString(),
+            }).then(handleResponse),
+
+        // Queue management
+        play: (url: string) =>
+            fetch(`${player_path}/play`, { method: 'POST', body: url }).then(handleResponse),
+
+        add: (url: string, next = false, shuffle = false) =>
+            fetch(`${player_path}/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, next, shuffle }),
+            }).then(handleResponse),
+
+        removeFromQueue: (index: number) =>
+            fetch(`${queue_path}/${index}`, { method: 'DELETE' }).then(handleResponse),
+
+        moveQueueItem: (fromIndex: number, toIndex: number, uri: string) =>
+            fetch(`${queue_path}/move`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ from: fromIndex, to: toIndex, uri }),
+            }).then(handleResponse),
+
+        // Search
+        search: (query: string, source: string, types = 'track'): Promise<SearchResult[]> => {
+            const params = new URLSearchParams({ query, source, types });
+            return fetch(`${search_path}?${params}`).then(handleResponse<SearchResult[]>);
+        },
+    };
+}
+
+// ---------------------------------------------------------------------------
+// Global (non-stream-scoped) API
+// ---------------------------------------------------------------------------
+
+export const guestApi = {
     getStreamState: async (): Promise<StreamState> => {
         const res = await fetch(`${STREAM_API_BASE}/guest`);
-        
-        if (!res.ok) {
-            console.error('Failed to fetch stream state:', res.statusText);
-            return { active: false, identifier: null };
-        }
-        return await handleResponse<StreamState>(res);
+        if (!res.ok) return { active: false, identifier: null };
+        return handleResponse<StreamState>(res);
     },
-
-    startStreamGuest: async (): Promise<void> => {
-        const res = await fetch(`${STREAM_API_BASE}/start/guest`, {
-            method: 'POST',
-        });
-        if (!res.ok) {
-            const errorText = await res.text().catch(() => 'Unknown error');
-            throw new Error(`Failed to start stream: ${res.status} - ${errorText}`);
-        }
-    }
-
-    /* 
-    getPlaybackState: async (): Promise<PlaybackState> => {
-        const res = await fetch(`${PLAYER_API_BASE}/playback`);
-        const state = await handleResponse<any>(res);
-        return {
-            ...state,
-            loop: (state.loop?.toUpperCase() || 'NONE') as LoopMode
-        };
-    },
-    */
-
-    /*
-    getQueue: async (): Promise<Track[]> => {
-        const res = await fetch(QUEUE_API_BASE);
-        return handleResponse<Track[]>(res);
-    },
-
-    getRecentlyPlayed: async (): Promise<Track[]> => {
-        const res = await fetch(`${QUEUE_API_BASE}/history`);
-        return handleResponse<Track[]>(res);
-    }
-    */
 };

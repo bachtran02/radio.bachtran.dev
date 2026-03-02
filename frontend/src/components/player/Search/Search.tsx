@@ -1,9 +1,11 @@
 import { Radio, Search as SearchIcon, Music2, List, Disc3, User, MoreVertical, Play, Shuffle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { api } from '../../../lib/api';
-import { displayDuration } from '../../../lib/utils';
-import type { SearchResult } from '../../../lib/api';
+import { handleApiError } from '@/lib/errors';
+import { displayDuration } from '@/lib/utils';
+import type { SearchResult } from '@/lib/api';
+import { useStreamApi } from '@/hooks/useStreamApi';
+import { useContextMenu } from '@/hooks/useContextMenu';
 
 type FilterType = 'track' | 'playlist' | 'album' | 'artist';
 
@@ -15,28 +17,16 @@ const filterConfig: Record<FilterType, { icon: React.ComponentType<{ size?: numb
 };
 
 export function Search() {
+
+    const api = useStreamApi();
+        
     const [query, setQuery] = useState('');
     const [source, setSource] = useState('youtube');
     const [loading, setLoading] = useState(false);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [addingUri, setAddingUri] = useState<string | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('track');
-    const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
-    const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-
-    useEffect(() => {
-        const handleClickOutside = () => {
-            if (openMenuIndex !== null) {
-                setOpenMenuIndex(null);
-                setMenuPosition(null);
-            }
-        };
-
-        if (openMenuIndex !== null) {
-            document.addEventListener('click', handleClickOutside);
-            return () => document.removeEventListener('click', handleClickOutside);
-        }
-    }, [openMenuIndex]);
+    const { openIndex: openMenuIndex, menuPosition, toggle: handleMenuToggle, close: closeMenu } = useContextMenu();
 
     const selectFilter = (filter: FilterType) => {
         setSelectedFilter(filter);
@@ -49,10 +39,10 @@ export function Search() {
         try {
             const results = await api.search(query, source, selectedFilter);
             setSearchResults(results);
-            setQuery('');
         } catch (error) {
-            alert('Search failed: ' + error);
+            handleApiError(error, 'Search failed');
         } finally {
+            setQuery('');
             setLoading(false);
         }
     };
@@ -62,7 +52,7 @@ export function Search() {
         try {
             await api.add(uri, false, false);
         } catch (error) {
-            alert('Failed to add track');
+            handleApiError(error, 'Failed to add track');
         } finally {
             setAddingUri(null);
         }
@@ -70,12 +60,12 @@ export function Search() {
 
     const handleAddNext = async (e: React.MouseEvent, uri: string) => {
         e.stopPropagation();
-        setOpenMenuIndex(null);
+        closeMenu();
         setAddingUri(uri);
         try {
             await api.add(uri, true, false);
         } catch (error) {
-            alert('Failed to add next');
+            handleApiError(error, 'Failed to add next');
         } finally {
             setAddingUri(null);
         }
@@ -83,12 +73,12 @@ export function Search() {
 
     const handleAddShuffle = async (e: React.MouseEvent, uri: string) => {
         e.stopPropagation();
-        setOpenMenuIndex(null);
+        closeMenu();
         setAddingUri(uri);
         try {
             await api.add(uri, false, true);
         } catch (error) {
-            alert('Failed to add and shuffle');
+            handleApiError(error, 'Failed to add and shuffle');
         } finally {
             setAddingUri(null);
         }
@@ -96,30 +86,14 @@ export function Search() {
 
     const handleAddNextShuffle = async (e: React.MouseEvent, uri: string) => {
         e.stopPropagation();
-        setOpenMenuIndex(null);
+        closeMenu();
         setAddingUri(uri);
         try {
             await api.add(uri, true, true);
         } catch (error) {
-            alert('Failed to add next and shuffle');
+            handleApiError(error, 'Failed to add next and shuffle');
         } finally {
             setAddingUri(null);
-        } 
-    };
-
-    const handleMenuToggle = (e: React.MouseEvent, index: number) => {
-        e.stopPropagation();
-        if (openMenuIndex === index) {
-            setOpenMenuIndex(null);
-            setMenuPosition(null);
-        } else {
-            const button = e.currentTarget as HTMLElement;
-            const rect = button.getBoundingClientRect();
-            setMenuPosition({
-                x: rect.right - 8,
-                y: rect.top + rect.height / 2
-            });
-            setOpenMenuIndex(index);
         }
     };
 

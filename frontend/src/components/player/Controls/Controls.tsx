@@ -10,40 +10,50 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { usePlayer } from '../../../context/PlayerContext';
-import { api, LoopMode, type StreamState } from '../../../lib/api';
+import { usePlayer } from '@/context/PlayerContext';
+import { useStreamApi } from '@/hooks/useStreamApi';
+import { LoopMode } from '@/lib/api';
 import { InitialControls } from './InitialControls';
+
+type LoopConfig = {
+    nextMode: LoopMode;
+    title: string;
+    icon: React.ReactNode;
+    className: string;
+};
+
+const LOOP_CONFIGS: Record<LoopMode, LoopConfig> = {
+    [LoopMode.NONE]: { 
+        nextMode: LoopMode.QUEUE, title: "Loop: Off", icon: <Repeat size={16} />, className: "loop-off" 
+    },
+    [LoopMode.QUEUE]: { 
+        nextMode: LoopMode.TRACK, title: "Loop: Queue", icon: <Repeat size={16} />, className: "loop-queue" 
+    },
+    [LoopMode.TRACK]: { 
+        nextMode: LoopMode.NONE, title: "Loop: Track", icon: <Repeat1 size={16} />, className: "loop-track" 
+    },
+};
 
 export function Controls() {
 
-    const [streamState, setStreamState] = useState<StreamState | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Fetch the state once when the component mounts
-        api.getStreamState()
-            .then((state) => {
-                setStreamState(state);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, []);
-
-    if (isLoading) {
-        return <div className="loading">Checking stream status...</div>;
-    } else if (!streamState?.active) {
-        return <InitialControls />;
-    }
-
-    const { playerData, volume, updateVolume } = usePlayer();
+    const { playerData, volume, updateVolume, locked, loading } = usePlayer();
+    const api = useStreamApi();
     const [showVolume, setShowVolume] = useState(false);
     const [optimisticLoop, setOptimisticLoop] = useState<LoopMode | null>(null);
 
-    const isPaused = playerData?.state?.isPaused;
-    const curLoop = optimisticLoop ?? playerData?.state?.loop;
+    if (loading) return <div className="loading">Checking stream status...</div>;
+    if (locked) return <InitialControls />;
+
+    const currentLoopMode = (playerData?.state?.loop ?? LoopMode.NONE) as LoopMode;
+    const config = LOOP_CONFIGS[optimisticLoop ?? currentLoopMode];
+
+    const handleToggleLoop = () => {
+        const nextMode = config.nextMode;
+        setOptimisticLoop(nextMode);
+        api.setLoopMode(nextMode);
+    };
 
     return (
         <div className="controls">
@@ -52,7 +62,7 @@ export function Controls() {
                 <RotateCcw size={16} />
             </button>
 
-            {!isPaused ? (
+            {!playerData?.state?.isPaused ? (
                 <button onClick={() => api.pause()} title="Pause">
                     <Pause size={16} />
                 </button>
@@ -74,28 +84,9 @@ export function Controls() {
                 <Shuffle size={16} />
             </button>
 
-            {curLoop === LoopMode.NONE ? (
-                <button className="loop-off" onClick={() => {
-                    setOptimisticLoop(LoopMode.QUEUE);
-                    api.setLoopMode(LoopMode.QUEUE)
-                }} title="Loop: Off">
-                    <Repeat size={16} />
-                </button>
-            ) : curLoop === LoopMode.QUEUE ? (
-                <button onClick={() => {
-                    setOptimisticLoop(LoopMode.TRACK);
-                    api.setLoopMode(LoopMode.TRACK)
-                }} title="Loop: Queue">
-                    <Repeat size={16} />
-                </button>
-            ) : (
-                <button onClick={() => {
-                    setOptimisticLoop(LoopMode.NONE);
-                    api.setLoopMode(LoopMode.NONE)
-                }} title="Loop: Track">
-                    <Repeat1 size={16} />
-                </button>
-            )}
+            <button className={config.className} onClick={handleToggleLoop} title={config.title}>
+                {config.icon}
+            </button>
 
             <div className="volume-control">
                 <button onClick={() => setShowVolume(!showVolume)} title="Volume">

@@ -7,10 +7,25 @@ import {
   Square, 
   VolumeX,
 } from 'lucide-react';
+import { useState } from 'react';
 
-import { api } from '../../../lib/api';
+import { useStreamApi } from '@/hooks/useStreamApi';
+import { handleApiError } from '@/lib/errors';
 
 export function InitialControls() {
+    const api = useStreamApi();
+    const [starting, setStarting] = useState(false);
+
+    const handleStartStream = async () => {
+        setStarting(true);
+        try {
+            await api.startStream();
+            window.location.reload();
+        } catch (err) {
+            handleApiError(err, 'Failed to start stream');
+            setStarting(false);
+        }
+    };
     
     return (
         <div className="controls controls--initial">
@@ -19,7 +34,7 @@ export function InitialControls() {
                 <RotateCcw size={16} />
             </button>
 
-            <button onClick={() => api.startStreamGuest()} title="Create stream">
+            <button onClick={handleStartStream} disabled={starting} title="Create stream">
                 <Plus size={16} />
             </button>
 

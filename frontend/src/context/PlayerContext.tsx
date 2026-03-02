@@ -1,20 +1,39 @@
 import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
 import { useQuery, useSubscription } from '@apollo/client/react/compiled';
-import { PLAYER_UPDATES_SUBSCRIPTION, GET_INITIAL_STATE } from '../lib/graphql';
+import { PLAYER_UPDATES_SUBSCRIPTION, GET_INITIAL_STATE } from '@/lib/graphql';
+import type { PlayerUpdateEvent, PlayerContextValue, StreamStatusValue } from '@/types/player';
+import { StreamStatus } from '@/types/player';
 
-import type { PlayerUpdateEvent } from '../types/player';
+const PlayerContext = createContext<PlayerContextValue | null>(null);
 
-const PlayerContext = createContext<any>(null);
+interface PlayerProviderProps {
+    children: React.ReactNode;
+    streamStatus: StreamStatusValue;
+    streamId: string | null;
+}
 
-export function PlayerProvider({ children }: { children: React.ReactNode }) {
-
+export function PlayerProvider({ children, streamStatus, streamId }: PlayerProviderProps) {
     const audioRef = useRef<HTMLVideoElement>(null);
     const [volume, setVolumeState] = useState(0);
     const [playerData, setPlayerData] = useState<PlayerUpdateEvent | null>(null);
 
-    const { data: queryData, loading: queryLoading } = useQuery<{ getInitialState: PlayerUpdateEvent }>(GET_INITIAL_STATE);
+    const isReady = streamStatus === StreamStatus.READY;
 
-    const { data: subData } = useSubscription<{ playerUpdates: PlayerUpdateEvent }>(PLAYER_UPDATES_SUBSCRIPTION);
+    const { data: queryData, loading: queryLoading } = useQuery<{ getInitialState: PlayerUpdateEvent }>(
+        GET_INITIAL_STATE,
+        {
+            variables: { streamId },
+            skip: !isReady,
+        }
+    );
+
+    const { data: subData } = useSubscription<{ playerUpdates: PlayerUpdateEvent }>(
+        PLAYER_UPDATES_SUBSCRIPTION,
+        {
+            variables: { streamId },
+            skip: !isReady,
+        }
+    );
 
     useEffect(() => {
         if (queryData?.getInitialState) {
@@ -26,37 +45,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const newEvent = subData?.playerUpdates;
         if (!newEvent) return;
 
-        setPlayerData((prev: PlayerUpdateEvent | null) => {
+        setPlayerData((prev) => {
             if (!prev) return newEvent;
 
             const { eventType } = newEvent;
 
-            if (eventType === "QUEUE_UPDATED" || eventType === "QUEUE_SHUFFLED") {
-                /* Only update Queue */
+            if (eventType === 'QUEUE_UPDATED' || eventType === 'QUEUE_SHUFFLED') {
                 return {
                     ...prev,
                     queue: newEvent.queue,
                     eventType: newEvent.eventType,
-                    state: {
-                        ...prev.state,
-                        position: undefined,
-                    }
+                    state: { ...prev.state, position: undefined },
                 };
             }
 
             if (
-                eventType === "PAUSE_TOGGLED" || 
-                eventType === "POSITION_SEEKED" || 
-                eventType === "LOOP_MODE_CHANGED"
+                eventType === 'PAUSE_TOGGLED' ||
+                eventType === 'POSITION_SEEKED' ||
+                eventType === 'LOOP_MODE_CHANGED'
             ) {
-                /* Only update PlaybackState */
                 return {
                     ...prev,
                     eventType: newEvent.eventType,
-                    state: {
-                        ...prev.state,
-                        ...newEvent.state
-                    }
+                    state: { ...prev.state, ...newEvent.state },
                 };
             }
 
@@ -72,24 +83,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    /* Sync browser tab title with the currently playing track */
     useEffect(() => {
         const track = playerData?.state?.track;
-        if (track) {
-            document.title = `${track.title} | ${track.author}`;
-        } else {
-            document.title = 'Bach\'s Personal Radio';
-        }
+        document.title = track
+            ? `${track.title} | ${track.author}`
+            : "Bach's Personal Radio";
     }, [playerData?.state?.track]);
 
-    const value = {
+    const value: PlayerContextValue = {
         audioRef,
         volume,
         updateVolume,
         playerData,
-        loading: queryLoading && !playerData
+        streamId,
+        locked: !isReady,
+        loading: (queryLoading || streamStatus === StreamStatus.CHECKING) && !playerData,
     };
 
-  return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
+    return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
 
-export const usePlayer = () => useContext(PlayerContext);
+export const usePlayer = (): PlayerContextValue => {
+    const ctx = useContext(PlayerContext);
+    if (!ctx) throw new Error('usePlayer must be used within a PlayerProvider');
+    return ctx;
+};
