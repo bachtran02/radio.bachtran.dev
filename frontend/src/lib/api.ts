@@ -38,6 +38,7 @@ export interface SearchResultPlaylist {
 export type SearchResult = SearchResultTrack | SearchResultPlaylist;
 
 export interface StreamState {
+    existed: boolean;
     active: boolean;
     identifier: string | null;
 }
@@ -133,10 +134,8 @@ export function createStreamApi(streamId: string) {
 // Global (non-stream-scoped) API
 // ---------------------------------------------------------------------------
 
-export const guestApi = {
-    getStreamState: async (): Promise<StreamState> => {
-        const res = await fetch(`${STREAM_API_BASE}/guest`);
-        if (!res.ok) return { active: false, identifier: null };
-        return handleResponse<StreamState>(res);
-    },
+export const authApi = {
+    createStream: (): Promise<StreamState> =>
+        fetch(`${STREAM_API_BASE}/create`, { method: 'POST', credentials: 'include' })
+            .then(handleResponse<StreamState>),
 };
