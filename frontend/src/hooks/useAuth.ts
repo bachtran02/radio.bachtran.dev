@@ -32,7 +32,8 @@ export function useAuth() {
     }, [fetchUser]);
 
     const login = useCallback(() => {
-        window.location.href = 'http://127.0.0.1:8080/oauth2/authorization/spotify';
+        // window.location.href = 'http://127.0.0.1:8080/oauth2/authorization/spotify';
+        window.location.href = 'https://radio.bachtran.dev/oauth2/authorization/spotify';
     }, []);
 
     const logout = useCallback(async () => {
