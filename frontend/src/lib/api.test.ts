@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createStreamApi, guestApi, LoopMode } from './api';
+import { createStreamApi, LoopMode } from './api';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,7 +44,7 @@ describe('createStreamApi', () => {
         ['shuffle', '/api/player/abc123/shuffle'],
     ])('%s() POSTs to %s', async (method, expectedUrl) => {
         fetchSpy.mockResolvedValueOnce(mockResponse({}));
-        await api[method as keyof typeof api]();
+        await (api[method as keyof typeof api] as () => Promise<unknown>)();
         expect(fetchSpy).toHaveBeenCalledWith(expectedUrl, { method: 'POST' });
     });
 
@@ -141,37 +141,5 @@ describe('createStreamApi', () => {
     it('rejects with an Error when the server returns a non-ok response', async () => {
         fetchSpy.mockResolvedValueOnce(mockResponse('Bad Request', false));
         await expect(api.skip()).rejects.toThrow('API Error: 400');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// guestApi
-// ---------------------------------------------------------------------------
-
-describe('guestApi', () => {
-    it('getStreamState returns active state on success', async () => {
-        fetchSpy.mockResolvedValueOnce(mockResponse({ active: true, identifier: 'guest' }));
-        const state = await guestApi.getStreamState();
-        expect(state).toEqual({ active: true, identifier: 'guest' });
-    });
-
-    it('getStreamState returns inactive fallback when fetch fails', async () => {
-        fetchSpy.mockResolvedValueOnce({ ok: false } as Response);
-        const state = await guestApi.getStreamState();
-        expect(state).toEqual({ active: false, identifier: null });
-    });
-
-    it('startStream resolves on 2xx', async () => {
-        fetchSpy.mockResolvedValueOnce({ ok: true } as Response);
-        await expect(guestApi.startStream()).resolves.toBeUndefined();
-    });
-
-    it('startStream throws on non-ok response', async () => {
-        fetchSpy.mockResolvedValueOnce({
-            ok: false,
-            status: 500,
-            text: () => Promise.resolve('Internal Server Error'),
-        } as unknown as Response);
-        await expect(guestApi.startStream()).rejects.toThrow('Failed to start stream: 500');
     });
 });

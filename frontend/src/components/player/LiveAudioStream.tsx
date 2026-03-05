@@ -130,6 +130,7 @@ export function LiveAudioStream() {
 
         } else {
             console.error('HLS not supported in this browser');
+            return;
         }
     }, [locked, streamId]);
 
