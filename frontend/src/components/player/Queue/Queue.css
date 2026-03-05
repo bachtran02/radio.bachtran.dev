@@ -145,3 +145,10 @@
   border-top: 2px solid var(--text-primary);
   margin-top: 2px;
 }
+
+
+@media (max-width: 600px) {
+  .queue-container {
+    padding: 12px;
+  }
+}

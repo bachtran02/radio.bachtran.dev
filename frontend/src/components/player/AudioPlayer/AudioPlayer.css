@@ -46,19 +46,27 @@
 
   .center-section {
     width: 100%;
+    min-width: 300px;
     max-width: 600px;
   }
 
   .right-section {
     width: 100%;
+    min-width: 300px;
     max-width: 650px;
   }
 
 }
 
+@media (max-width: 500px) {
+  .audio-player {
+    padding: 8px;
+  }
+}
+
 @media (max-width: 400px) {
   .audio-player {
-    padding: 10px;
+    padding: 4px;
   }
 }
 
