@@ -6,6 +6,7 @@ import { displayDuration } from '@/lib/utils';
 import type { SearchResult } from '@/lib/api';
 import { useStreamApi } from '@/hooks/useStreamApi';
 import { useContextMenu } from '@/hooks/useContextMenu';
+import { usePlayer } from '@/context/PlayerContext';
 
 type FilterType = 'track' | 'playlist' | 'album' | 'artist';
 
@@ -19,6 +20,7 @@ const filterConfig: Record<FilterType, { icon: React.ComponentType<{ size?: numb
 export function Search() {
 
     const api = useStreamApi();
+    const { locked } = usePlayer();
         
     const [query, setQuery] = useState('');
     const [source, setSource] = useState('youtube');
@@ -104,9 +106,10 @@ export function Search() {
     };
 
     return (
-        <div className="search-container">
+        <div className={`search-container${locked ? ' search-container--locked' : ''}`}
+          title={locked ? 'Start stream to perform search' : undefined}>
             <form onSubmit={handleSearch}>
-                <select value={source} onChange={(e) => {
+                <select disabled={locked} value={source} onChange={(e) => {
                     setSource(e.target.value);
                     setSelectedFilter('track');
                 }}>
@@ -119,9 +122,9 @@ export function Search() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search..."
-                    disabled={loading}
+                    disabled={locked || loading}
                 />
-                <button type="submit" disabled={loading}>
+                <button type="submit" disabled={locked || loading}>
                     {loading ? '...' : <SearchIcon size={14} />}
                 </button>
             </form>
@@ -129,7 +132,7 @@ export function Search() {
             <div className="search-filters">
                 {(['track', 'playlist', 'album', 'artist'] as FilterType[]).map(filter => {
                     const { icon: Icon, label } = filterConfig[filter];
-                    const isDisabled = source !== 'spotify';
+                    const isDisabled = locked || source !== 'spotify';
                     return (
                         <button
                             key={filter}
@@ -137,7 +140,7 @@ export function Search() {
                             className={`filter-button ${selectedFilter === filter ? 'active' : ''}`}
                             onClick={() => selectFilter(filter)}
                             disabled={isDisabled}
-                            title={isDisabled ? 'Only available for Spotify' : `Search ${label}`}
+                            title={isDisabled ? (locked ? 'Not connected' : 'Only available for Spotify') : `Search ${label}`}
                         >
                             <Icon size={16} />
                             <span>{label}</span>
