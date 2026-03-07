@@ -120,6 +120,7 @@ export function Controls() {
                 isOpen={openMenuIndex === 0 && !!menuPosition}
                 menuPosition={menuPosition ?? { x: 0, y: 0 }}
                 isLoggedIn={!!user}
+                username={user?.name ?? 'Guest User'}
                 onLogin={login}
                 onLogout={logout}
                 onClose={closeMenu}

@@ -15,12 +15,13 @@ interface ProfileMenuProps {
     isOpen: boolean;
     menuPosition: MenuPosition;
     isLoggedIn: boolean;
+    username?: string;
     onLogin: () => void;
     onLogout: () => void;
     onClose: () => void;
 }
 
-export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, onLogin, onLogout, onClose }: ProfileMenuProps) {
+export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, username, onLogin, onLogout, onClose }: ProfileMenuProps) {
     if (!isOpen) return null;
 
     const handleItem = (e: React.MouseEvent, action: () => void) => {
@@ -36,6 +37,12 @@ export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, onLogin, onLogou
         >
             {isLoggedIn ? (
                 <div>
+                    <div
+                      className="context-menu-item context-menu-item--label"
+                    >
+                        <span>{username}</span>
+                    </div>
+
                     <button
                         className="context-menu-item"
                         onClick={(e) => handleItem(e, onLogout)}

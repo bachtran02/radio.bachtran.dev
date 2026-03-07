@@ -18,7 +18,7 @@ export function LiveAudioStream() {
         const audio = audioRef.current;
         if (locked || !audio || !streamId) return;
 
-        const hlsUrl = `${config.hlsBase}/${streamId}/index.m3u8`;
+        const hlsUrl = `${config.hlsBase}/mediamtx/${streamId}/index.m3u8`;
 
         if (Hls.isSupported()) {
             let hls = new Hls({ maxLiveSyncPlaybackRate: 1.5 });

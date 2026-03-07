@@ -34,7 +34,7 @@ export function useAuth() {
 
     const login = useCallback(() => {
         const base = config.oauthBase || window.location.origin;
-        window.location.href = `${base}/oauth2/authorization/spotify`;
+        window.location.href = `${base}/oauth2/authorization/github`;
     }, []);
 
     const logout = useCallback(async () => {
