@@ -1,17 +1,20 @@
 import { Radio, MoreVertical, Play, Trash2, Plus } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { usePlayer } from '../../../context/PlayerContext';
-import { api } from '../../../lib/api';
-import { displayDuration } from '../../../lib/utils';
-import type { TrackInfo } from '../../../types/player';
+import { usePlayer } from '@/context/PlayerContext';
+import { useContextMenu } from '@/hooks/useContextMenu';
+import { useStreamApi } from '@/hooks/useStreamApi';
+import { handleApiError } from '@/lib/errors';
+import { displayDuration } from '@/lib/utils';
+import type { TrackInfo } from '@/types/player';
 
 /* Fixed height for each queue/history item, used for virtual scrolling calculations */
 const QUEUE_ITEM_HEIGHT = 76;       
 
 export function Queue() {
     const { playerData } = usePlayer();
+    const api = useStreamApi();
 
     const queue = playerData?.queue || [];
     const history = playerData?.history || [];
@@ -19,8 +22,7 @@ export function Queue() {
     const [activeTab, setActiveTab] = useState<'queue' | 'history'>('queue');
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-    const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
-    const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+    const { openIndex: openMenuIndex, menuPosition, toggle: handleMenuToggle, close: closeMenu } = useContextMenu();
     const queueParentRef = useRef<HTMLDivElement>(null);
     const historyParentRef = useRef<HTMLDivElement>(null);
 
@@ -38,15 +40,6 @@ export function Queue() {
         overscan: 5,
     });
 
-    useEffect(() => {
-        const handleClickOutside = () => {
-            setOpenMenuIndex(null);
-            setMenuPosition(null);
-        };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
-
     const handlePlay = async (trackUri: string) => {
         try {
             await api.play(trackUri);
@@ -59,7 +52,7 @@ export function Queue() {
         try {
             await api.add(uri, false, false);
         } catch (error) {
-            alert('Failed to add track');
+            handleApiError(error, 'Failed to add track');
         }
     };
 
@@ -109,25 +102,9 @@ export function Queue() {
         setDragOverIndex(null);
     };
 
-    const handleMenuToggle = (e: React.MouseEvent, index: number) => {
-        e.stopPropagation();
-        if (openMenuIndex === index) {
-            setOpenMenuIndex(null);
-            setMenuPosition(null);
-        } else {
-            const button = e.currentTarget as HTMLElement;
-            const rect = button.getBoundingClientRect();
-            setMenuPosition({
-                x: rect.right - 8,
-                y: rect.top + rect.height / 2
-            });
-            setOpenMenuIndex(index);
-        }
-    };
-
     const handlePlayNext = async (e: React.MouseEvent, track: TrackInfo, index: number) => {
         e.stopPropagation();
-        setOpenMenuIndex(null);
+        closeMenu();
         try {
             if (isQueueTab) {
                 await api.moveQueueItem(index, 0, track.uri);
@@ -141,7 +118,7 @@ export function Queue() {
 
     const handleRemove = async (e: React.MouseEvent, index: number) => {
         e.stopPropagation();
-        setOpenMenuIndex(null);
+        closeMenu();
         await removeQueuedItem(index);
     };
 
@@ -202,7 +179,10 @@ export function Queue() {
                 )}
                 <div className="queue-item-info">
                     <div className="queue-item-title" title={track.title}>{track.title}</div>
-                    <div className="queue-item-meta" title={`${track.author} • ${displayDuration(track.isStream, track.duration)}`}>{track.author} • {displayDuration(track.isStream, track.duration)}</div>
+                    <div className="queue-item-meta" title={
+                        `${track.author} • ${displayDuration(track.isStream, track.duration)}`}>
+                            {track.author} • {displayDuration(track.isStream, track.duration)}
+                    </div>
                 </div>
                 <button
                     className="context-menu-button"
@@ -233,7 +213,7 @@ export function Queue() {
                                 className="context-menu-item"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setOpenMenuIndex(null);
+                                    closeMenu();
                                     handleAddTrack(track.uri);
                                 }}
                             >

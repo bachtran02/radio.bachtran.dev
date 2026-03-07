@@ -5,6 +5,10 @@
   background-color: var(--bg-secondary);
 }
 
+.search-container--locked:hover {
+  cursor: not-allowed;
+}
+
 .search-container h3 {
   margin: 0 0 12px 0;
   font-size: 14px;
@@ -22,16 +26,13 @@
   display: flex;
   gap: 0;
   margin-bottom: 10px;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 4px;
-  overflow: hidden;
-  width: 100%;
 }
 
 .filter-button {
-  padding: 8px 20px;
+  padding: 10px 20px;
   border: none;
   border-radius: 6px;
   color: var(--text-secondary);
@@ -53,8 +54,8 @@
 
 .filter-button.active {
   color: var(--text-primary);
-  background-color: var(--bg-secondary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
 }
 
 .filter-button:not(:disabled):hover {
@@ -73,32 +74,34 @@
   background-color: transparent;
 }
 
-.search-container select {
+.search-container select,
+.search-container input,
+.search-container form button {
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 14px;
   padding: 8px 12px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+}
+
+.search-container select {
   cursor: pointer;
-  min-width: 110px;
-  max-width: 135px;
+  width: 110px;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .search-container input {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  min-width: 0;
 }
 
 .search-container form button {
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -202,7 +205,35 @@
   white-space: nowrap;
 }
 
+
+.search-container--locked select,
+.search-container--locked input,
+.search-container--locked form button,
+.search-container--locked .filter-button {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (max-width: 1200px) {
+  .search-results {
+    max-height: 240px;
+  }
+}
+
 @media (max-width: 600px) {
+  .search-container {
+    padding: 12px;
+  }
+
+  .search-results {
+    max-height: 180px;
+  }
+
+  .filter-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
   .search-filters {
     padding: 3px;
   }

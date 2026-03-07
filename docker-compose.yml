@@ -48,6 +48,7 @@ services:
       - KOTLIN_GRPC_PORT=9090
       - WEBRTC_GRPC_HOST=webrtc-bridge
       - WEBRTC_GRPC_PORT=50051
+      - MEDIA_MTX_API_BASE_URL=http://mediamtx:9997/v3
 
   frontend:
     build:

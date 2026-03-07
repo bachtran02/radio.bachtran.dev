@@ -1,11 +1,13 @@
 import { Radio } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { usePlayer } from '../../../context/PlayerContext';
-import { api } from '../../../lib/api';
-import { displayDuration } from '../../../lib/utils';
+import { useRef, useState, useEffect } from 'react';
+import { usePlayer } from '@/context/PlayerContext';
+import { useLocalProgress } from '@/hooks/useLocalProgress';
+import { useStreamApi } from '@/hooks/useStreamApi';
+import { displayDuration } from '@/lib/utils';
 export function NowPlaying() {
 
     const { playerData } = usePlayer();
+    const api = useStreamApi();
 
     const track = playerData?.state?.track;
     const isPaused = playerData?.state?.isPaused ?? true;
@@ -13,35 +15,13 @@ export function NowPlaying() {
     const isStream = track?.isStream || false;
 
     const serverPosition = playerData?.state?.position;
-    const [localProgress, setLocalProgress] = useState(serverPosition ?? 0);
-
-    useEffect(() => {
-    if (typeof serverPosition !== 'number') return;
-
-    if (playerData?.eventType === 'TRACK_STARTED') {
-        setLocalProgress(0);
-        return;
-    }
-
-    /* Prevent drifting */
-    const drift = Math.abs(localProgress - serverPosition);
-    if (drift > 2000 || serverPosition === 0) {
-        setLocalProgress(serverPosition);
-    }
-}, [serverPosition, playerData?.eventType]);
-
-    useEffect(() => {
-        if (isPaused || isStream) return;
-
-        const interval = setInterval(() => {
-            setLocalProgress((prev: number) => {
-                const next = prev + 1000;
-                return next > duration ? duration : next;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isPaused, isStream, duration]);
+    const [localProgress, setLocalProgress] = useLocalProgress({
+        serverPosition,
+        eventType: playerData?.eventType,
+        isPaused,
+        isStream,
+        duration,
+    });
 
 
     const titleRef = useRef<HTMLDivElement>(null);

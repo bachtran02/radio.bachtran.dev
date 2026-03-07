@@ -13,8 +13,8 @@ const TRACK_FIELDS = gql`
 `;
 
 export const GET_INITIAL_STATE = gql`
-  query GetInitialState {
-    getInitialState {
+  query GetInitialState($streamId: String!) {
+    getInitialState(streamId: $streamId) {
       eventType
       state {
         isPlaying
@@ -37,8 +37,8 @@ export const GET_INITIAL_STATE = gql`
 `;
 
 export const PLAYER_UPDATES_SUBSCRIPTION = gql`
-  subscription OnPlayerUpdate {
-    playerUpdates {
+  subscription OnPlayerUpdate($streamId: String!) {
+    playerUpdates(streamId: $streamId) {
       eventType
       state {
         isPlaying
