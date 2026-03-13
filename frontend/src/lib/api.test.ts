@@ -131,7 +131,7 @@ describe('createStreamApi', () => {
 
     it('search defaults types to "track"', async () => {
         fetchSpy.mockResolvedValueOnce(mockResponse([]));
-        await api.search('test', 'spotify');
+        await api.search('test', 'deezer');
         const calledUrl = fetchSpy.mock.calls[0][0] as string;
         expect(calledUrl).toContain('types=track');
     });

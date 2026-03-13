@@ -114,7 +114,8 @@ export function Search() {
                     setSelectedFilter('track');
                 }}>
                     <option value="youtube">YouTube</option>
-                    <option value="spotify">Spotify</option>
+                    {/* <option value="spotify">Spotify</option> */}
+                    <option value="deezer">Deezer</option>
                     <option value="soundcloud">Soundcloud</option>
                 </select>
                 <input
@@ -132,7 +133,8 @@ export function Search() {
             <div className="search-filters">
                 {(['track', 'playlist', 'album', 'artist'] as FilterType[]).map(filter => {
                     const { icon: Icon, label } = filterConfig[filter];
-                    const isDisabled = locked || source !== 'spotify';
+                    // const isDisabled = locked || source !== 'spotify';
+                    const isDisabled = locked || source !== 'deezer';
                     return (
                         <button
                             key={filter}
@@ -140,7 +142,7 @@ export function Search() {
                             className={`filter-button ${selectedFilter === filter ? 'active' : ''}`}
                             onClick={() => selectFilter(filter)}
                             disabled={isDisabled}
-                            title={isDisabled ? (locked ? 'Not connected' : 'Only available for Spotify') : `Search ${label}`}
+                            title={isDisabled ? (locked ? 'Not connected' : 'Only available for Deezer') : `Search ${label}`}
                         >
                             <Icon size={16} />
                             <span>{label}</span>
