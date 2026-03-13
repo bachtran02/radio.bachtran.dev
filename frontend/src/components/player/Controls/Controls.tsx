@@ -1,4 +1,6 @@
 import { 
+  MonitorPause,
+  MonitorPlay,
   Pause,
   Play,
   Plus,
@@ -31,13 +33,13 @@ type LoopConfig = {
 
 const LOOP_CONFIGS: Record<LoopMode, LoopConfig> = {
     [LoopMode.NONE]: { 
-        nextMode: LoopMode.QUEUE, title: "Loop: Off", icon: <Repeat size={16} />, className: "loop-off" 
+        nextMode: LoopMode.QUEUE, title: "Loop: Off", icon: <Repeat size={16} />, className: "" 
     },
     [LoopMode.QUEUE]: { 
-        nextMode: LoopMode.TRACK, title: "Loop: Queue", icon: <Repeat size={16} />, className: "loop-queue" 
+        nextMode: LoopMode.TRACK, title: "Loop: Queue", icon: <Repeat size={16} />, className: "loop-active" 
     },
     [LoopMode.TRACK]: { 
-        nextMode: LoopMode.NONE, title: "Loop: Track", icon: <Repeat1 size={16} />, className: "loop-track" 
+        nextMode: LoopMode.NONE, title: "Loop: Track", icon: <Repeat1 size={16} />, className: "loop-active" 
     },
 };
 

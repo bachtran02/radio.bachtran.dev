@@ -52,6 +52,22 @@
   pointer-events: none;
 }
 
+.controls button.loop-active {
+  position: relative;
+}
+
+.controls button.loop-active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--text-primary);
+}
+
 .volume-control {
   position: relative;
   display: flex;
