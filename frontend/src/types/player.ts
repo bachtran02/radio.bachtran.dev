@@ -51,4 +51,6 @@ export interface PlayerContextValue {
     streamId: string | null;
     locked: boolean;
     loading: boolean;
+    streamConnecting: boolean;
+    setStreamConnecting: (val: boolean) => void;
 }

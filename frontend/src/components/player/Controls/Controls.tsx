@@ -14,7 +14,7 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,16 +45,31 @@ const LOOP_CONFIGS: Record<LoopMode, LoopConfig> = {
 
 export function Controls() {
 
-    const { playerData, volume, updateVolume, locked, loading } = usePlayer();
+    const { audioRef, playerData, volume, updateVolume, locked, loading, streamConnecting } = usePlayer();
     const api = useStreamApi();
     const { user, login, logout } = useAuth();
     const [showVolume, setShowVolume] = useState(false);
     const [optimisticLoop, setOptimisticLoop] = useState<LoopMode | null>(null);
     const [starting, setStarting] = useState(false);
+    const [, forceUpdate] = useState(0);
     const { openIndex: openMenuIndex, menuPosition, toggle: handleMenuToggle, close: closeMenu } = useContextMenu();
 
-    if (loading) return <div className="loading">Checking stream status...</div>;
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const trigger = () => { forceUpdate(n => n + 1); };
+        audio.addEventListener('pause', trigger);
+        audio.addEventListener('play', trigger);
+        return () => {
+            audio.removeEventListener('pause', trigger);
+            audio.removeEventListener('play', trigger);
+        };
+    }, [audioRef, audioRef.current]);
 
+    if (loading) return <div className="loading">Checking stream status...</div>;
+    if (streamConnecting) return <div className="loading">Connecting to stream...</div>;
+
+    const audio = audioRef.current;
     const currentLoopMode = (playerData?.state?.loop ?? LoopMode.NONE) as LoopMode;
     const config = LOOP_CONFIGS[optimisticLoop ?? currentLoopMode];
 
@@ -87,20 +102,38 @@ export function Controls() {
                     <Plus size={16} />
                 </button>
             ) : !playerData?.state?.isPaused ? (
-                <button onClick={() => api.pause()} title="Pause">
-                    <Pause size={16} />
+                <button onClick={() => api.pause()} title="Pause stream">
+                    <MonitorPause size={16} />
                 </button>
             ) : (
-                <button onClick={() => api.resume()} title="Play">
-                    <Play size={16} />
+                <button onClick={() => api.resume()} title="Resume stream">
+                    <MonitorPlay size={16} />
                 </button>
             )}
+
+            <button
+                disabled={locked}
+                onClick={() => {
+                    if (audio?.paused) {
+                        audio?.play();
+                    } else {
+                        audio?.pause();
+                    }
+                }}
+                title={audio?.paused ? 'Resume' : 'Pause'}
+            >
+                {audio?.paused ? <Play size={16} /> : <Pause size={16} />}
+            </button>
 
             <button disabled={locked} onClick={() => api.skip()} title="Skip">
                 <SkipForward size={16} />
             </button>
 
-            <button disabled={locked} onClick={() => api.stop()} title="Stop">
+            <button disabled={locked} onClick={
+              () => {
+                audio?.pause();
+                api.stop()
+              }} title="Stop">
                 <Square size={16} />
             </button>
 

@@ -16,6 +16,7 @@ export function PlayerProvider({ children, streamStatus, streamId }: PlayerProvi
     const audioRef = useRef<HTMLVideoElement>(null);
     const [volume, setVolumeState] = useState(0);
     const [playerData, setPlayerData] = useState<PlayerUpdateEvent | null>(null);
+    const [streamConnecting, setStreamConnecting] = useState(false);
 
     const isReady = streamStatus === StreamStatus.READY;
 
@@ -99,6 +100,8 @@ export function PlayerProvider({ children, streamStatus, streamId }: PlayerProvi
         streamId,
         locked: !isReady,
         loading: (queryLoading || streamStatus === StreamStatus.CHECKING) && !playerData,
+        streamConnecting,
+        setStreamConnecting,
     };
 
     return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
