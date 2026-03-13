@@ -132,7 +132,7 @@ export function Controls() {
             <button disabled={locked} onClick={
               () => {
                 audio?.pause();
-                api.stop()
+                api.stop();
               }} title="Stop">
                 <Square size={16} />
             </button>

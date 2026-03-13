@@ -59,3 +59,27 @@ body.dark-mode {
 .theme-toggle:active {
   transform: scale(0.95);
 }
+
+.app-error-toast {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f8d7da;
+  color: #842029;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  z-index: 10000;
+  border: 1px solid #f5c2c7;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-align: center;
+  max-width: 80vw;
+}
+
+.app-error-toast--visible {
+  opacity: 1;
+}

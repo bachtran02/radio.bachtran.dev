@@ -21,6 +21,12 @@ interface ProfileMenuProps {
     onClose: () => void;
 }
 
+function truncateUsername(value?: string, maxLength = 20): string {
+    if (!value) return '';
+    if (value.length <= maxLength) return value;
+    return `${value.slice(0, maxLength - 1)}...`;
+}
+
 export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, username, onLogin, onLogout, onClose }: ProfileMenuProps) {
     if (!isOpen) return null;
 
@@ -40,7 +46,7 @@ export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, username, onLogi
                     <div
                       className="context-menu-item context-menu-item--label"
                     >
-                        <span>{username}</span>
+                        <span title={username}>{truncateUsername(username)}</span>
                     </div>
 
                     <button
@@ -60,7 +66,7 @@ export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, username, onLogi
                     })}
                     >
                         <CirclePlay size={16} />
-                        <span>Personal Player</span>
+                        <span>My Player</span>
                     </button>
                 </div>
             ) : (
@@ -76,7 +82,7 @@ export function ProfileMenu({ isOpen, menuPosition, isLoggedIn, username, onLogi
                         className="context-menu-item context-menu-item--disabled"
                     >
                         <CirclePlay size={16} />
-                        <span>Player</span>
+                        <span>My Player</span>
                     </button>
                 </div>
             )}
