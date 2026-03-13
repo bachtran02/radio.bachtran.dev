@@ -89,7 +89,32 @@ export function PlayerProvider({ children, streamStatus, streamId }: PlayerProvi
         const track = playerData?.state?.track;
         document.title = track
             ? `${track.title} | ${track.author}`
-            : "Bach's Personal Radio";
+            : "Bach Radio";
+    }, [playerData?.state?.track]);
+
+    useEffect(() => {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+
+        const track = playerData?.state?.track;
+        if (!track) {
+            navigator.mediaSession.metadata = null;
+            return;
+        }
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title,
+            artist: track.author,
+            artwork: track.artworkUrl
+                ? [
+                    { src: track.artworkUrl, sizes: '96x96', type: 'image/jpeg' },
+                    { src: track.artworkUrl, sizes: '128x128', type: 'image/jpeg' },
+                    { src: track.artworkUrl, sizes: '192x192', type: 'image/jpeg' },
+                    { src: track.artworkUrl, sizes: '256x256', type: 'image/jpeg' },
+                    { src: track.artworkUrl, sizes: '384x384', type: 'image/jpeg' },
+                    { src: track.artworkUrl, sizes: '512x512', type: 'image/jpeg' },
+                ]
+                : [],
+        });
     }, [playerData?.state?.track]);
 
     const value: PlayerContextValue = {
