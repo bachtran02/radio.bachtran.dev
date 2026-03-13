@@ -1,6 +1,8 @@
 [submodule "backend/lavaradio"]
 	path = backend/lavaradio
 	url = https://github.com/bachtran02/LavaRadio.git
+	branch = main
 [submodule "backend/webrtc-bridge"]
 	path = backend/webrtc-bridge
 	url = https://github.com/bachtran02/WebRTC-bridge-server.git
+	branch = main
